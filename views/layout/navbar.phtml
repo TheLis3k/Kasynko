@@ -1,0 +1,28 @@
+<nav class="navbar">
+    <a class="navbar__brand" href="/">&spades; Kasyno</a>
+    <ul class="navbar__links">
+<?php if (\App\Helpers\AuthMiddleware::isLoggedIn()): ?>
+        <li><a href="/roulette"><?= t('nav.roulette') ?></a></li>
+        <li><a href="/slots"><?= t('nav.slots') ?></a></li>
+        <li><a href="/bets"><?= t('nav.bets') ?></a></li>
+<?php if (($_SESSION['user']['role'] ?? '') === 'admin'): ?>
+        <li><a href="/admin"><?= t('nav.admin') ?></a></li>
+<?php endif; ?>
+        <li><a href="/profile"><?= t('nav.profile') ?></a></li>
+        <li class="navbar__balance"><?= t('nav.balance') ?>: <strong><?= e(number_format((float)($_SESSION['user']['balance'] ?? 0), 2)) ?></strong></li>
+        <li>
+            <form method="post" action="/logout" style="display:inline">
+                <input type="hidden" name="_csrf" value="<?= csrf_token() ?>">
+                <button type="submit" class="btn btn--link"><?= t('auth.logout') ?></button>
+            </form>
+        </li>
+<?php else: ?>
+        <li><a href="/login"><?= t('auth.login') ?></a></li>
+        <li><a href="/register"><?= t('auth.register') ?></a></li>
+<?php endif; ?>
+        <li class="navbar__lang">
+            <a href="/lang/pl">PL</a> |
+            <a href="/lang/en">EN</a>
+        </li>
+    </ul>
+</nav>

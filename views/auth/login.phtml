@@ -1,0 +1,32 @@
+<?php $pageTitle = t('auth.login'); require dirname(__DIR__) . '/layout/header.phtml'; ?>
+<div class="auth-wrap">
+    <div class="card">
+        <div class="card__title">&spades; <?= t('auth.login') ?></div>
+        <form method="post" action="/login" novalidate>
+            <input type="hidden" name="_csrf" value="<?= csrf_token() ?>">
+
+            <div class="form-group">
+                <label for="email"><?= t('auth.email') ?></label>
+                <input type="email" id="email" name="email" value="<?= old('email') ?>" required autocomplete="email">
+                <?php foreach (($_SESSION['errors']['email'] ?? []) as $err): ?>
+                    <div class="form-error"><?= e($err) ?></div>
+                <?php endforeach; unset($_SESSION['errors']['email']); ?>
+            </div>
+
+            <div class="form-group">
+                <label for="password"><?= t('auth.password') ?></label>
+                <input type="password" id="password" name="password" required autocomplete="current-password">
+                <?php foreach (($_SESSION['errors']['password'] ?? []) as $err): ?>
+                    <div class="form-error"><?= e($err) ?></div>
+                <?php endforeach; unset($_SESSION['errors']['password']); ?>
+            </div>
+
+            <button type="submit" class="btn btn--primary" style="width:100%"><?= t('auth.login') ?></button>
+        </form>
+        <?php unset($_SESSION['errors'], $_SESSION['old']); ?>
+        <p style="margin-top:1rem;font-size:.85rem;color:var(--color-text-muted)">
+            <?= t('auth.register') ?>? <a href="/register"><?= t('auth.register') ?></a>
+        </p>
+    </div>
+</div>
+<?php require dirname(__DIR__) . '/layout/footer.phtml'; ?>

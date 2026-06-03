@@ -1,0 +1,79 @@
+<?php $pageTitle = t('admin.dashboard'); require dirname(__DIR__) . '/layout/header.phtml'; ?>
+<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:1.5rem">
+    <h1 style="font-size:1.4rem;color:var(--color-gold)"><?= t('admin.dashboard') ?></h1>
+    <a href="/admin/reports" class="btn btn--outline btn--sm"><?= t('admin.reports') ?></a>
+</div>
+
+<div class="stats-grid">
+    <div class="stat-card">
+        <div class="stat-card__value"><?= (int)$stats['total_users'] ?></div>
+        <div class="stat-card__label"><?= t('admin.total_users') ?></div>
+    </div>
+    <div class="stat-card">
+        <div class="stat-card__value"><?= (int)$stats['total_sessions'] ?></div>
+        <div class="stat-card__label"><?= t('admin.total_sessions') ?></div>
+    </div>
+    <div class="stat-card">
+        <div class="stat-card__value"><?= number_format((float)$stats['total_staked'], 2) ?></div>
+        <div class="stat-card__label"><?= t('admin.total_staked') ?></div>
+    </div>
+    <div class="stat-card">
+        <div class="stat-card__value"><?= number_format((float)$stats['net_revenue'], 2) ?></div>
+        <div class="stat-card__label"><?= t('admin.total_revenue') ?></div>
+    </div>
+</div>
+
+<div class="card">
+    <div class="card__title"><?= t('admin.game_stats') ?></div>
+    <div class="table-wrap">
+        <table>
+            <thead>
+                <tr>
+                    <th><?= t('bets.game') ?></th>
+                    <th><?= t('admin.total_sessions') ?></th>
+                    <th><?= t('bets.total_staked') ?></th>
+                    <th><?= t('bets.total_payout') ?></th>
+                    <th><?= t('admin.total_revenue') ?></th>
+                </tr>
+            </thead>
+            <tbody>
+            <?php foreach ($gameStats as $gs): ?>
+                <tr>
+                    <td><?= e($gs['name']) ?></td>
+                    <td><?= (int)$gs['sessions'] ?></td>
+                    <td><?= number_format((float)$gs['total_staked'], 2) ?></td>
+                    <td><?= number_format((float)$gs['total_payout'], 2) ?></td>
+                    <td><?= number_format((float)$gs['revenue'], 2) ?></td>
+                </tr>
+            <?php endforeach; ?>
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<div class="card">
+    <div class="card__title"><?= t('admin.top_players') ?></div>
+    <div class="table-wrap">
+        <table>
+            <thead>
+                <tr>
+                    <th>#</th>
+                    <th><?= t('auth.first_name') ?> <?= t('auth.last_name') ?></th>
+                    <th><?= t('auth.email') ?></th>
+                    <th><?= t('bets.total_staked') ?></th>
+                </tr>
+            </thead>
+            <tbody>
+            <?php foreach ($topSpenders as $i => $player): ?>
+                <tr>
+                    <td><?= $i + 1 ?></td>
+                    <td><?= e($player['first_name'] . ' ' . $player['last_name']) ?></td>
+                    <td><?= e($player['email']) ?></td>
+                    <td><?= number_format((float)$player['total_staked'], 2) ?></td>
+                </tr>
+            <?php endforeach; ?>
+            </tbody>
+        </table>
+    </div>
+</div>
+<?php require dirname(__DIR__) . '/layout/footer.phtml'; ?>

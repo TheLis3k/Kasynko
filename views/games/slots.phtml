@@ -1,0 +1,49 @@
+<?php $pageTitle = t('nav.slots'); require dirname(__DIR__) . '/layout/header.phtml'; ?>
+<div class="game-wrap">
+    <div class="card">
+        <div class="card__title">&#127922; <?= t('nav.slots') ?></div>
+
+        <?php if ($result): ?>
+        <div style="text-align:center;margin-bottom:1.5rem">
+            <div class="slots-display">
+                <?php foreach ($result['reels'] as $symbol): ?>
+                    <div class="reel"><?= e($symbol) ?></div>
+                <?php endforeach; ?>
+            </div>
+            <?php if ($result['is_win']): ?>
+                <p style="color:var(--color-success);font-size:1.2rem;font-weight:700">
+                    <?= t('game.win') ?> &times;<?= (int)$result['multiplier'] ?>
+                    &mdash; <?= t('game.payout') ?>: <strong><?= number_format((float)$result['payout'], 2) ?></strong>
+                </p>
+            <?php else: ?>
+                <p style="color:var(--color-error);font-size:1.1rem"><?= t('game.lose') ?></p>
+            <?php endif; ?>
+        </div>
+        <?php endif; ?>
+
+        <form method="post" action="/slots">
+            <input type="hidden" name="_csrf" value="<?= csrf_token() ?>">
+            <div class="form-group">
+                <label for="bet_amount"><?= t('game.bet_amount') ?></label>
+                <input type="number" id="bet_amount" name="bet_amount" min="0.01" step="0.01" value="10" required>
+            </div>
+            <button type="submit" class="btn btn--gold" style="width:100%"><?= t('game.spin') ?></button>
+        </form>
+
+        <div style="margin-top:1.5rem">
+            <h3 style="color:var(--color-gold);font-size:.95rem;margin-bottom:.6rem">Tabela wypłat</h3>
+            <table>
+                <thead><tr><th>Kombinacja</th><th>Mnożnik</th></tr></thead>
+                <tbody>
+                <?php foreach ($payout_table as $combo => $multiplier): ?>
+                    <tr>
+                        <td style="font-size:1.3rem;letter-spacing:.2rem"><?= e($combo) ?></td>
+                        <td>&times;<?= (int)$multiplier ?></td>
+                    </tr>
+                <?php endforeach; ?>
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+<?php require dirname(__DIR__) . '/layout/footer.phtml'; ?>

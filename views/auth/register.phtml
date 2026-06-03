@@ -1,0 +1,77 @@
+<?php $pageTitle = t('auth.register'); require dirname(__DIR__) . '/layout/header.phtml'; ?>
+<div class="auth-wrap" style="max-width:520px">
+    <div class="card">
+        <div class="card__title">&spades; <?= t('auth.register') ?></div>
+        <form method="post" action="/register" novalidate>
+            <input type="hidden" name="_csrf" value="<?= csrf_token() ?>">
+
+            <div class="form-row">
+                <div class="form-group">
+                    <label for="first_name"><?= t('auth.first_name') ?></label>
+                    <input type="text" id="first_name" name="first_name" value="<?= old('first_name') ?>" required maxlength="100">
+                    <?php foreach (($_SESSION['errors']['first_name'] ?? []) as $err): ?>
+                        <div class="form-error"><?= e($err) ?></div>
+                    <?php endforeach; ?>
+                </div>
+                <div class="form-group">
+                    <label for="last_name"><?= t('auth.last_name') ?></label>
+                    <input type="text" id="last_name" name="last_name" value="<?= old('last_name') ?>" required maxlength="100">
+                    <?php foreach (($_SESSION['errors']['last_name'] ?? []) as $err): ?>
+                        <div class="form-error"><?= e($err) ?></div>
+                    <?php endforeach; ?>
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label for="email"><?= t('auth.email') ?></label>
+                <input type="email" id="email" name="email" value="<?= old('email') ?>" required maxlength="255" autocomplete="email">
+                <?php foreach (($_SESSION['errors']['email'] ?? []) as $err): ?>
+                    <div class="form-error"><?= e($err) ?></div>
+                <?php endforeach; ?>
+            </div>
+
+            <div class="form-row">
+                <div class="form-group">
+                    <label for="password"><?= t('auth.password') ?></label>
+                    <input type="password" id="password" name="password" required minlength="8" autocomplete="new-password">
+                    <?php foreach (($_SESSION['errors']['password'] ?? []) as $err): ?>
+                        <div class="form-error"><?= e($err) ?></div>
+                    <?php endforeach; ?>
+                </div>
+                <div class="form-group">
+                    <label for="password_confirm"><?= t('auth.confirm_password') ?></label>
+                    <input type="password" id="password_confirm" name="password_confirm" required autocomplete="new-password">
+                    <?php foreach (($_SESSION['errors']['password_confirm'] ?? []) as $err): ?>
+                        <div class="form-error"><?= e($err) ?></div>
+                    <?php endforeach; ?>
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label for="lang_preference"><?= t('auth.language') ?></label>
+                <select id="lang_preference" name="lang_preference">
+                    <option value="pl" <?= old('lang_preference', 'pl') === 'pl' ? 'selected' : '' ?>><?= t('auth.lang_pl') ?></option>
+                    <option value="en" <?= old('lang_preference') === 'en' ? 'selected' : '' ?>><?= t('auth.lang_en') ?></option>
+                </select>
+            </div>
+
+            <div class="form-group">
+                <label><?= t('auth.initial_balance') ?></label>
+                <input type="number" name="initial_balance" value="1000" min="0" step="0.01" readonly style="opacity:.6">
+                <small style="color:var(--color-text-muted);font-size:.75rem">Bonus powitalny: 1000 PLN</small>
+            </div>
+
+            <div class="form-group form-check">
+                <input type="checkbox" id="terms" name="terms" value="1" <?= old('terms') === '1' ? 'checked' : '' ?> required>
+                <label for="terms" style="margin:0"><?= t('auth.terms') ?></label>
+            </div>
+
+            <button type="submit" class="btn btn--primary" style="width:100%;margin-top:.5rem"><?= t('auth.register') ?></button>
+        </form>
+        <?php unset($_SESSION['errors'], $_SESSION['old']); ?>
+        <p style="margin-top:1rem;font-size:.85rem;color:var(--color-text-muted)">
+            <?= t('auth.login') ?>? <a href="/login"><?= t('auth.login') ?></a>
+        </p>
+    </div>
+</div>
+<?php require dirname(__DIR__) . '/layout/footer.phtml'; ?>

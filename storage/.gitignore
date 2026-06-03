@@ -1,0 +1,3 @@
+uploads/**
+!uploads/avatars/.gitkeep
+!uploads/documents/.gitkeep

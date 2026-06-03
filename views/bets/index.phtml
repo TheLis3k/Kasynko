@@ -1,0 +1,157 @@
+<?php
+$pageTitle = t('bets.title');
+require dirname(__DIR__) . '/layout/header.phtml';
+
+function sortUrl(string $col, string $currentSort, string $currentDir, array $filters): string {
+    $dir = ($currentSort === $col && $currentDir === 'ASC') ? 'DESC' : 'ASC';
+    $q = array_merge($filters, ['sort' => $col, 'dir' => $dir]);
+    return '?' . http_build_query($q);
+}
+function arrow(string $col, string $currentSort, string $currentDir): string {
+    if ($currentSort !== $col) return '';
+    return $currentDir === 'ASC' ? ' &#8593;' : ' &#8595;';
+}
+?>
+
+<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:1rem">
+    <h1 style="font-size:1.4rem;color:var(--color-gold)"><?= t('bets.title') ?></h1>
+    <a href="/bets/create" class="btn btn--primary btn--sm"><?= t('bets.add') ?></a>
+</div>
+
+<!-- Summary stats -->
+<div class="stats-grid">
+    <div class="stat-card">
+        <div class="stat-card__value"><?= (int)$aggregates['total_count'] ?></div>
+        <div class="stat-card__label"><?= t('bets.count') ?></div>
+    </div>
+    <div class="stat-card">
+        <div class="stat-card__value"><?= number_format((float)$aggregates['total_staked'], 2) ?></div>
+        <div class="stat-card__label"><?= t('bets.total_staked') ?></div>
+    </div>
+    <div class="stat-card">
+        <div class="stat-card__value"><?= number_format((float)$aggregates['total_payout'], 2) ?></div>
+        <div class="stat-card__label"><?= t('bets.total_payout') ?></div>
+    </div>
+    <div class="stat-card">
+        <div class="stat-card__value"><?= number_format((float)$aggregates['net_revenue'], 2) ?></div>
+        <div class="stat-card__label"><?= t('bets.net') ?></div>
+    </div>
+</div>
+
+<!-- Filter bar -->
+<div class="filter-bar">
+    <form method="get" action="/bets">
+        <div class="form-group">
+            <label><?= t('bets.search') ?></label>
+            <input type="text" name="search" value="<?= e($filters['search']) ?>" placeholder="...">
+        </div>
+        <div class="form-group">
+            <label><?= t('bets.game') ?></label>
+            <select name="game_type">
+                <option value=""><?= t('bets.all_games') ?></option>
+                <?php foreach ($games as $g): ?>
+                    <option value="<?= e($g['type']) ?>" <?= $filters['game_type'] === $g['type'] ? 'selected' : '' ?>><?= e($g['name']) ?></option>
+                <?php endforeach; ?>
+            </select>
+        </div>
+        <div class="form-group">
+            <label><?= t('bets.outcome') ?></label>
+            <select name="outcome">
+                <option value=""><?= t('bets.all_outcomes') ?></option>
+                <option value="win"  <?= $filters['outcome'] === 'win'  ? 'selected' : '' ?>><?= t('bets.win') ?></option>
+                <option value="lose" <?= $filters['outcome'] === 'lose' ? 'selected' : '' ?>><?= t('bets.lose') ?></option>
+            </select>
+        </div>
+        <div class="form-group">
+            <label><?= t('bets.date_from') ?></label>
+            <input type="date" name="date_from" value="<?= e($filters['date_from']) ?>">
+        </div>
+        <div class="form-group">
+            <label><?= t('bets.date_to') ?></label>
+            <input type="date" name="date_to" value="<?= e($filters['date_to']) ?>">
+        </div>
+        <div class="form-group">
+            <label><?= t('bets.min_amount') ?></label>
+            <input type="number" name="min_amount" value="<?= e($filters['min_amount']) ?>" step="0.01" min="0">
+        </div>
+        <div class="form-group">
+            <label><?= t('bets.max_amount') ?></label>
+            <input type="number" name="max_amount" value="<?= e($filters['max_amount']) ?>" step="0.01" min="0">
+        </div>
+        <div class="form-group" style="align-self:flex-end">
+            <button type="submit" class="btn btn--outline btn--sm"><?= t('bets.filter') ?></button>
+        </div>
+    </form>
+</div>
+
+<!-- Export links -->
+<div style="margin-bottom:.8rem;display:flex;gap:.5rem">
+    <?php $exportBase = '/bets/export?' . http_build_query(array_merge($filters, ['sort' => $sort, 'dir' => $dir])); ?>
+    <a href="<?= e($exportBase . '&format=csv') ?>" class="btn btn--outline btn--sm"><?= t('bets.export_csv') ?></a>
+    <a href="<?= e($exportBase . '&format=json') ?>" class="btn btn--outline btn--sm"><?= t('bets.export_json') ?></a>
+</div>
+
+<!-- Table -->
+<div class="table-wrap">
+    <table>
+        <thead>
+            <tr>
+                <th><a href="<?= e(sortUrl('bet_type', $sort, $dir, $filters)) ?>"><?= t('bets.type') ?><?= arrow('bet_type', $sort, $dir) ?></a></th>
+                <th><?= t('bets.value') ?></th>
+                <th><a href="<?= e(sortUrl('bet_amount', $sort, $dir, $filters)) ?>"><?= t('bets.amount') ?><?= arrow('bet_amount', $sort, $dir) ?></a></th>
+                <th><a href="<?= e(sortUrl('outcome', $sort, $dir, $filters)) ?>"><?= t('bets.outcome') ?><?= arrow('outcome', $sort, $dir) ?></a></th>
+                <th><a href="<?= e(sortUrl('payout', $sort, $dir, $filters)) ?>"><?= t('bets.payout') ?><?= arrow('payout', $sort, $dir) ?></a></th>
+                <th><?= t('bets.game') ?></th>
+                <th><a href="<?= e(sortUrl('created_at', $sort, $dir, $filters)) ?>"><?= t('bets.date') ?><?= arrow('created_at', $sort, $dir) ?></a></th>
+                <th><?= t('general.actions') ?></th>
+            </tr>
+        </thead>
+        <tbody>
+        <?php if (empty($result['rows'])): ?>
+            <tr><td colspan="8" style="text-align:center;color:var(--color-text-muted);padding:2rem">—</td></tr>
+        <?php else: ?>
+            <?php foreach ($result['rows'] as $row): ?>
+            <tr>
+                <td><?= e($row['bet_type']) ?></td>
+                <td><?= e($row['bet_value']) ?></td>
+                <td><?= number_format((float)$row['bet_amount'], 2) ?></td>
+                <td><span class="badge badge--<?= e($row['outcome']) ?>"><?= e($row['outcome']) ?></span></td>
+                <td><?= number_format((float)$row['payout'], 2) ?></td>
+                <td><?= e($row['game_name']) ?></td>
+                <td><?= e(substr($row['created_at'], 0, 16)) ?></td>
+                <td style="white-space:nowrap">
+                    <a href="/bets/<?= (int)$row['id'] ?>/edit" class="btn btn--outline btn--sm"><?= t('general.edit') ?></a>
+                    <form method="post" action="/bets/<?= (int)$row['id'] ?>/delete" style="display:inline"
+                          onsubmit="return confirm('<?= e(t('general.confirm_delete')) ?>')">
+                        <input type="hidden" name="_csrf" value="<?= csrf_token() ?>">
+                        <button type="submit" class="btn btn--danger btn--sm"><?= t('general.delete') ?></button>
+                    </form>
+                </td>
+            </tr>
+            <?php endforeach; ?>
+        <?php endif; ?>
+        </tbody>
+    </table>
+</div>
+
+<!-- Pagination -->
+<?php if ($result['pages'] > 1): ?>
+<div class="pagination">
+    <?php if ($page > 1): ?>
+        <a href="?<?= http_build_query(array_merge($filters, ['sort' => $sort, 'dir' => $dir, 'page' => $page - 1])) ?>"><?= t('pagination.prev') ?></a>
+    <?php endif; ?>
+    <?php for ($p = 1; $p <= $result['pages']; $p++): ?>
+        <?php if ($p === $page): ?>
+            <span class="active"><?= $p ?></span>
+        <?php else: ?>
+            <a href="?<?= http_build_query(array_merge($filters, ['sort' => $sort, 'dir' => $dir, 'page' => $p])) ?>"><?= $p ?></a>
+        <?php endif; ?>
+    <?php endfor; ?>
+    <?php if ($page < $result['pages']): ?>
+        <a href="?<?= http_build_query(array_merge($filters, ['sort' => $sort, 'dir' => $dir, 'page' => $page + 1])) ?>"><?= t('pagination.next') ?></a>
+    <?php endif; ?>
+    <span style="color:var(--color-text-muted);font-size:.8rem"><?= $result['total'] ?> rekordów</span>
+</div>
+<?php endif; ?>
+
+<?php require dirname(__DIR__) . '/layout/footer.phtml'; ?>

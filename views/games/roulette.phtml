@@ -1,0 +1,62 @@
+<?php $pageTitle = t('nav.roulette'); require dirname(__DIR__) . '/layout/header.phtml'; ?>
+<div class="game-wrap">
+    <div class="card">
+        <div class="card__title">&#9900; <?= t('nav.roulette') ?></div>
+
+        <?php if ($result): ?>
+        <div style="text-align:center;margin-bottom:1.5rem">
+            <div class="roulette-wheel"><?= (int)$result['winning_number'] ?></div>
+            <p><?= t('game.winning_number') ?>: <strong><?= (int)$result['winning_number'] ?></strong></p>
+            <?php if ($result['is_win']): ?>
+                <p style="color:var(--color-success);font-size:1.2rem;font-weight:700">
+                    <?= t('game.win') ?> &mdash; <?= t('game.payout') ?>: <strong><?= number_format((float)$result['payout'], 2) ?></strong>
+                </p>
+            <?php else: ?>
+                <p style="color:var(--color-error);font-size:1.1rem"><?= t('game.lose') ?></p>
+            <?php endif; ?>
+        </div>
+        <?php endif; ?>
+
+        <form method="post" action="/roulette">
+            <input type="hidden" name="_csrf" value="<?= csrf_token() ?>">
+
+            <div class="form-group">
+                <label for="bet_type"><?= t('game.bet_type') ?></label>
+                <select id="bet_type" name="bet_type" onchange="updateBetValue(this.value)">
+                    <option value="number"><?= t('game.number') ?></option>
+                    <option value="color"><?= t('game.color') ?></option>
+                    <option value="parity"><?= t('game.parity') ?></option>
+                </select>
+            </div>
+
+            <!-- No-JS: all three value fields always present; server picks based on bet_type -->
+            <div class="form-group">
+                <label><?= t('game.number') ?></label>
+                <input type="number" name="bet_value_number" min="0" max="36" step="1" value="0">
+            </div>
+            <div class="form-group">
+                <label><?= t('game.color') ?></label>
+                <select name="bet_value_color">
+                    <option value="red"><?= t('game.red') ?></option>
+                    <option value="black"><?= t('game.black') ?></option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label><?= t('game.parity') ?></label>
+                <select name="bet_value_parity">
+                    <option value="even"><?= t('game.even') ?></option>
+                    <option value="odd"><?= t('game.odd') ?></option>
+                </select>
+            </div>
+
+            <div class="form-group">
+                <label for="bet_amount"><?= t('game.bet_amount') ?></label>
+                <input type="number" id="bet_amount" name="bet_amount" min="0.01" step="0.01" value="10" required>
+            </div>
+
+            <button type="submit" class="btn btn--gold" style="width:100%"><?= t('game.place_bet') ?></button>
+        </form>
+    </div>
+</div>
+
+<?php require dirname(__DIR__) . '/layout/footer.phtml'; ?>

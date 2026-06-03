@@ -1,0 +1,63 @@
+<?php $pageTitle = t('profile.title'); require dirname(__DIR__) . '/layout/header.phtml'; ?>
+<div class="card" style="max-width:560px;margin:0 auto">
+    <div class="card__title"><?= t('profile.title') ?></div>
+
+    <div style="display:flex;align-items:center;gap:1.5rem;margin-bottom:1.5rem">
+        <?php if (!empty($user['avatar_path'])): ?>
+            <img src="/profile/avatar/<?= e(basename($user['avatar_path'])) ?>" class="avatar" alt="avatar">
+        <?php else: ?>
+            <div class="avatar avatar--placeholder">&#128100;</div>
+        <?php endif; ?>
+        <div>
+            <strong><?= e($user['first_name'] . ' ' . $user['last_name']) ?></strong><br>
+            <span style="color:var(--color-text-muted);font-size:.85rem"><?= e($user['email']) ?></span><br>
+            <span class="badge badge--win" style="margin-top:.3rem"><?= e($user['role']) ?></span>
+        </div>
+    </div>
+
+    <form method="post" action="/profile" enctype="multipart/form-data" novalidate>
+        <input type="hidden" name="_csrf" value="<?= csrf_token() ?>">
+
+        <div class="form-row">
+            <div class="form-group">
+                <label for="first_name"><?= t('auth.first_name') ?></label>
+                <input type="text" id="first_name" name="first_name" value="<?= e($user['first_name']) ?>" maxlength="100" required>
+                <?php foreach (($_SESSION['errors']['first_name'] ?? []) as $err): ?>
+                    <div class="form-error"><?= e($err) ?></div>
+                <?php endforeach; ?>
+            </div>
+            <div class="form-group">
+                <label for="last_name"><?= t('auth.last_name') ?></label>
+                <input type="text" id="last_name" name="last_name" value="<?= e($user['last_name']) ?>" maxlength="100" required>
+                <?php foreach (($_SESSION['errors']['last_name'] ?? []) as $err): ?>
+                    <div class="form-error"><?= e($err) ?></div>
+                <?php endforeach; ?>
+            </div>
+        </div>
+
+        <div class="form-group">
+            <label for="lang_preference"><?= t('auth.language') ?></label>
+            <select id="lang_preference" name="lang_preference">
+                <option value="pl" <?= $user['lang_preference'] === 'pl' ? 'selected' : '' ?>><?= t('auth.lang_pl') ?></option>
+                <option value="en" <?= $user['lang_preference'] === 'en' ? 'selected' : '' ?>><?= t('auth.lang_en') ?></option>
+            </select>
+        </div>
+
+        <div class="form-group">
+            <label for="avatar"><?= t('profile.upload') ?> (JPEG, PNG, GIF — max 5 MB)</label>
+            <input type="file" id="avatar" name="avatar" accept="image/jpeg,image/png,image/gif">
+        </div>
+
+        <button type="submit" class="btn btn--primary"><?= t('general.save') ?></button>
+    </form>
+    <?php unset($_SESSION['errors']); ?>
+
+    <hr style="margin:1.5rem 0;border-color:rgba(255,255,255,.07)">
+
+    <form method="post" action="/profile/delete"
+          onsubmit="return confirm('<?= e(t('general.confirm_delete')) ?>')">
+        <input type="hidden" name="_csrf" value="<?= csrf_token() ?>">
+        <button type="submit" class="btn btn--danger btn--sm"><?= t('profile.delete_acct') ?></button>
+    </form>
+</div>
+<?php require dirname(__DIR__) . '/layout/footer.phtml'; ?>
