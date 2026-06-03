@@ -164,3 +164,9 @@ phpunit tests/
 - Eksport: CSV obowiązkowy; PDF i JSON preferowane.
 - `created_at` ustawiany automatycznie (DEFAULT CURRENT_TIMESTAMP lub w `save()`).
 - Każdy tekst UI musi przechodzić przez helper `t($key)`.
+
+## Dokumentacja postępu prac
+- Żywa mapa implementacji znajduje się w `Docs/IMPLEMENTATION.md` (utrzymywana przez agenta `doc-maintainer`).
+- **Przed** rozpoczęciem nowej funkcjonalności sprawdź ten plik — żeby nie dublować istniejącego kodu.
+- **Po** znaczącej zmianie (nowa klasa/kontroler/serwis/widok/migracja) zaktualizuj mapę (lub deleguj do `doc-maintainer`).
+- Dokument zawiera: mapę funkcja→pliki, rejestr klas i odpowiedzialności (SRP), schemat bazy, ustalone konwencje, status Definition of Done oraz listę duplikacji do refaktoryzacji.
