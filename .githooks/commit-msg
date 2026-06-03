@@ -1,0 +1,40 @@
+#!/bin/sh
+# Conventional Commits enforcement — see .claude/rules/commit-rules.md
+# Configured via: git config core.hooksPath .githooks
+
+commit_file="$1"
+
+# First non-empty, non-comment line = the subject.
+subject=$(grep -v '^#' "$commit_file" | sed '/^[[:space:]]*$/d' | head -n1)
+
+# Allow merge / revert / fixup / squash commits to pass through.
+case "$subject" in
+  "Merge "*|"Revert "*|"fixup! "*|"squash! "*)
+    exit 0
+    ;;
+esac
+
+types="feat|fix|docs|style|refactor|perf|test|build|ci|chore|revert"
+pattern="^(${types})(\([a-z0-9-]+\))?(!)?: .+"
+
+if ! printf '%s' "$subject" | grep -Eq "$pattern"; then
+  echo "✖ Niepoprawny format commita (Conventional Commits)." >&2
+  echo "" >&2
+  echo "  Otrzymano: $subject" >&2
+  echo "  Oczekiwano: <type>(<scope>): <subject>" >&2
+  echo "  Typy: ${types}" >&2
+  echo "  Przykład: feat(roulette): dodaj wypłatę dla zakładów na kolor" >&2
+  echo "" >&2
+  echo "  Pełny standard: .claude/rules/commit-rules.md" >&2
+  exit 1
+fi
+
+# Subject length limit (72 chars).
+length=$(printf '%s' "$subject" | wc -c)
+if [ "$length" -gt 72 ]; then
+  echo "✖ Subject ma ${length} znaków — limit to 72." >&2
+  echo "  $subject" >&2
+  exit 1
+fi
+
+exit 0

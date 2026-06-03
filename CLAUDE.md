@@ -139,7 +139,17 @@ docker run --name kasynko-pg -e POSTGRES_PASSWORD=secret -p 5432:5432 -d postgre
 
 # Testy (jeśli są)
 phpunit tests/
+
+# Jednorazowa konfiguracja po sklonowaniu repo (włącza hook commit-msg + szablon)
+git config core.hooksPath .githooks
+git config commit.template .gitmessage
 ```
+
+## Commit Standard
+- Repozytorium stosuje **Conventional Commits**: `<type>(<scope>): <subject>`.
+- Pełny standard i lista typów/zakresów: `.claude/rules/commit-rules.md`.
+- Format wymuszany przez hook `.githooks/commit-msg` (włączany komendą `git config core.hooksPath .githooks`).
+- Subject ≤ 72 znaki, tryb rozkazujący, bez kropki. Przykład: `feat(roulette): dodaj wypłatę dla zakładów na kolor`.
 
 ## Important Conventions
 - Zawsze **PRG** po POST → redirect do GET, flash w sesji.

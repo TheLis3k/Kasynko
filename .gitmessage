@@ -1,0 +1,14 @@
+# <type>(<scope>): <subject>   (max 72 znaki, tryb rozkazujący, bez kropki)
+#
+# Typy:  feat fix docs style refactor perf test build ci chore revert
+# Scope: auth roulette slots bets crud db i18n admin reports kmeans
+#        promo export files ui errors config docs   (opcjonalny)
+#
+# --- body (opcjonalne, oddziel pustą linią): co i dlaczego, nie jak ---
+#
+#
+# --- stopka (opcjonalna) ---
+# BREAKING CHANGE: <opis>
+# Refs: #<numer-issue>
+#
+# Pełny standard: .claude/rules/commit-rules.md
