@@ -61,12 +61,13 @@ class GameSession
     {
         $stmt = $this->db->prepare(
             'UPDATE game_sessions
-             SET game_id = :game_id, bet_type = :bet_type, bet_value = :bet_value,
+             SET user_id = :user_id, game_id = :game_id, bet_type = :bet_type, bet_value = :bet_value,
                  bet_amount = :bet_amount, outcome = :outcome, payout = :payout, note = :note
              WHERE id = :id'
         );
         $stmt->execute([
             ':id'         => $id,
+            ':user_id'    => $data['user_id'],
             ':game_id'    => $data['game_id'],
             ':bet_type'   => $data['bet_type'],
             ':bet_value'  => $data['bet_value'],

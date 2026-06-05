@@ -1,0 +1,57 @@
+<?php $pageTitle = t('promo.title'); require dirname(__DIR__) . '/layout/header.phtml'; ?>
+<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:1.5rem">
+    <h1 style="font-size:1.4rem;color:var(--color-gold)"><?= t('promo.title') ?></h1>
+    <a href="/admin" class="btn btn--outline btn--sm"><?= t('admin.dashboard') ?></a>
+</div>
+
+<div class="card">
+    <div class="card__title"><?= t('promo.top_spenders') ?></div>
+    <p style="color:var(--color-text-muted);font-size:.875rem;margin-bottom:1rem">
+        <?= t('promo.top_spenders_desc') ?>
+    </p>
+    <div class="table-wrap">
+        <table>
+            <thead>
+                <tr>
+                    <th>#</th>
+                    <th><?= t('auth.first_name') ?> <?= t('auth.last_name') ?></th>
+                    <th><?= t('auth.email') ?></th>
+                    <th><?= t('bets.total_staked') ?></th>
+                    <th><?= t('nav.balance') ?></th>
+                    <th><?= t('general.actions') ?></th>
+                </tr>
+            </thead>
+            <tbody>
+            <?php foreach ($topSpenders as $i => $player): ?>
+                <tr>
+                    <td><?= $i + 1 ?></td>
+                    <td><?= e($player['first_name'] . ' ' . $player['last_name']) ?></td>
+                    <td><?= e($player['email']) ?></td>
+                    <td><?= number_format((float)$player['total_staked'], 2) ?></td>
+                    <td><?= number_format((float)$player['balance'], 2) ?></td>
+                    <td>
+                        <?php if ($player['already_rewarded']): ?>
+                            <span class="badge badge--win"><?= t('promo.already_rewarded') ?></span>
+                        <?php else: ?>
+                            <form method="post" action="/admin/promotions/award" style="display:inline">
+                                <input type="hidden" name="_csrf"    value="<?= csrf_token() ?>">
+                                <input type="hidden" name="user_id" value="<?= (int)$player['id'] ?>">
+                                <input type="text"   name="note"
+                                       placeholder="<?= e(t('promo.note_placeholder')) ?>"
+                                       style="width:140px;padding:.25rem .5rem;font-size:.8rem;
+                                              background:var(--color-surface);color:var(--color-text);
+                                              border:1px solid rgba(255,255,255,.15);border-radius:4px">
+                                <button type="submit" class="btn btn--primary btn--sm"
+                                        onclick="return confirm('<?= e(t('promo.confirm_award')) ?>')">
+                                    <?= t('promo.award') ?>
+                                </button>
+                            </form>
+                        <?php endif; ?>
+                    </td>
+                </tr>
+            <?php endforeach; ?>
+            </tbody>
+        </table>
+    </div>
+</div>
+<?php require dirname(__DIR__) . '/layout/footer.phtml'; ?>

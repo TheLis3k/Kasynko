@@ -4,14 +4,18 @@ namespace App\Controllers;
 
 use App\Helpers\{Database, Validation};
 use App\Models\User;
+use App\Services\PromotionService;
 
 class AuthController extends BaseController
 {
-    private User $users;
+    private User             $users;
+    private PromotionService $promotions;
 
     public function __construct()
     {
-        $this->users = new User(Database::getInstance());
+        $pdo              = Database::getInstance();
+        $this->users      = new User($pdo);
+        $this->promotions = new PromotionService($pdo);
     }
 
     public function showLogin(): void
@@ -55,7 +59,7 @@ class AuthController extends BaseController
         $_SESSION['lang'] = $user['lang_preference'];
 
         flash('success', t('auth.logged_in'));
-        redirect('/bets');
+        redirect('/games');
     }
 
     public function showRegister(): void
@@ -91,7 +95,7 @@ class AuthController extends BaseController
             redirect('/register');
         }
 
-        $this->users->create([
+        $userId = $this->users->create([
             'first_name' => $v->get('first_name'),
             'last_name'  => $v->get('last_name'),
             'email'      => $v->get('email'),
@@ -100,7 +104,14 @@ class AuthController extends BaseController
             'lang'       => $v->get('lang_preference', 'pl'),
         ]);
 
-        flash('success', t('auth.registered_ok'));
+        // Welcome bonus
+        $bonus = $this->promotions->grantWelcomeBonus($userId);
+        $msg   = t('auth.registered_ok');
+        if ($bonus > 0) {
+            $msg .= ' ' . sprintf(t('promo.welcome_granted'), number_format($bonus, 2));
+        }
+
+        flash('success', $msg);
         redirect('/login');
     }
 

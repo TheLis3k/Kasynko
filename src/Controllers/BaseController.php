@@ -38,6 +38,23 @@ abstract class BaseController
         AuthMiddleware::requireRole('admin');
     }
 
+    protected function requireCroupier(): void
+    {
+        AuthMiddleware::requireRole('croupier');
+    }
+
+    /** Allows both admin and croupier. */
+    protected function requireAdminOrCroupier(): void
+    {
+        $this->requireLogin();
+        $role = $_SESSION['user']['role'] ?? '';
+        if ($role !== 'admin' && $role !== 'croupier') {
+            http_response_code(403);
+            require dirname(__DIR__, 2) . '/views/errors/403.phtml';
+            exit;
+        }
+    }
+
     protected function currentUser(): ?array
     {
         return AuthMiddleware::currentUser();

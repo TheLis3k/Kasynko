@@ -1,26 +1,7 @@
-<?php $pageTitle = t('admin.dashboard'); require dirname(__DIR__) . '/layout/header.phtml'; ?>
+<?php $pageTitle = t('croupier.title'); require dirname(__DIR__) . '/layout/header.phtml'; ?>
 <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:1.5rem">
-    <h1 style="font-size:1.4rem;color:var(--color-gold)"><?= t('admin.dashboard') ?></h1>
-    <a href="/admin/reports" class="btn btn--outline btn--sm"><?= t('admin.reports') ?></a>
-</div>
-
-<div class="stats-grid">
-    <div class="stat-card">
-        <div class="stat-card__value"><?= (int)$stats['total_users'] ?></div>
-        <div class="stat-card__label"><?= t('admin.total_users') ?></div>
-    </div>
-    <div class="stat-card">
-        <div class="stat-card__value"><?= (int)$stats['total_sessions'] ?></div>
-        <div class="stat-card__label"><?= t('admin.total_sessions') ?></div>
-    </div>
-    <div class="stat-card">
-        <div class="stat-card__value"><?= number_format((float)$stats['total_staked'], 2) ?></div>
-        <div class="stat-card__label"><?= t('admin.total_staked') ?></div>
-    </div>
-    <div class="stat-card">
-        <div class="stat-card__value"><?= number_format((float)$stats['net_revenue'], 2) ?></div>
-        <div class="stat-card__label"><?= t('admin.total_revenue') ?></div>
-    </div>
+    <h1 style="font-size:1.4rem;color:var(--color-gold)"><?= t('croupier.title') ?></h1>
+    <span style="color:var(--color-text-muted);font-size:.85rem"><?= t('croupier.desc') ?></span>
 </div>
 
 <div class="card">
@@ -52,30 +33,33 @@
 </div>
 
 <div class="card">
-    <div class="card__title"><?= t('admin.top_players') ?></div>
+    <div class="card__title"><?= t('admin.user_activity') ?></div>
     <div class="table-wrap">
         <table>
             <thead>
                 <tr>
-                    <th>#</th>
                     <th><?= t('auth.first_name') ?> <?= t('auth.last_name') ?></th>
                     <th><?= t('auth.email') ?></th>
+                    <th><?= t('admin.total_sessions') ?></th>
                     <th><?= t('bets.total_staked') ?></th>
+                    <th><?= t('admin.last_played') ?></th>
                 </tr>
             </thead>
             <tbody>
-            <?php foreach ($topSpenders as $i => $player): ?>
+            <?php foreach ($activity as $u): ?>
                 <tr>
-                    <td><?= $i + 1 ?></td>
-                    <td><?= e($player['first_name'] . ' ' . $player['last_name']) ?></td>
-                    <td><?= e($player['email']) ?></td>
-                    <td><?= number_format((float)$player['total_staked'], 2) ?></td>
+                    <td><?= e($u['first_name'] . ' ' . $u['last_name']) ?></td>
+                    <td><?= e($u['email']) ?></td>
+                    <td><?= (int)$u['sessions'] ?></td>
+                    <td><?= number_format((float)$u['total_staked'], 2) ?></td>
+                    <td><?= $u['last_played'] ? e(substr($u['last_played'], 0, 16)) : '—' ?></td>
                 </tr>
             <?php endforeach; ?>
             </tbody>
         </table>
     </div>
 </div>
+
 <div class="card">
     <div class="card__title"><?= t('admin.audit_log') ?></div>
     <div class="table-wrap">
@@ -85,20 +69,18 @@
                     <th><?= t('audit.date') ?></th>
                     <th><?= t('audit.actor') ?></th>
                     <th><?= t('audit.action') ?></th>
-                    <th><?= t('audit.entity') ?></th>
                     <th><?= t('audit.description') ?></th>
                 </tr>
             </thead>
             <tbody>
             <?php if (empty($auditLog)): ?>
-                <tr><td colspan="5" style="text-align:center;color:var(--color-text-muted);padding:1.5rem"><?= t('audit.no_entries') ?></td></tr>
+                <tr><td colspan="4" style="text-align:center;color:var(--color-text-muted);padding:1.5rem"><?= t('audit.no_entries') ?></td></tr>
             <?php else: ?>
                 <?php foreach ($auditLog as $entry): ?>
                 <tr>
                     <td style="white-space:nowrap;font-size:.8rem"><?= e(substr($entry['created_at'], 0, 16)) ?></td>
                     <td><?= e($entry['actor_name']) ?></td>
                     <td><code style="font-size:.8rem"><?= e($entry['action']) ?></code></td>
-                    <td style="font-size:.8rem"><?= e($entry['entity_type']) ?><?= $entry['entity_id'] ? ' #' . (int)$entry['entity_id'] : '' ?></td>
                     <td style="font-size:.8rem;color:var(--color-text-muted)"><?= e($entry['description']) ?></td>
                 </tr>
                 <?php endforeach; ?>

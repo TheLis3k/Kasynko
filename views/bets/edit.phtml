@@ -1,32 +1,93 @@
 <?php $pageTitle = t('bets.edit'); require dirname(__DIR__) . '/layout/header.phtml'; ?>
+<style>
+.bet-val-group{display:none}
+.bet-val-group.active{display:block}
+</style>
 <div class="card" style="max-width:600px;margin:0 auto">
     <div class="card__title"><?= t('bets.edit') ?></div>
     <form method="post" action="/bets/<?= (int)$session['id'] ?>/update" novalidate>
         <input type="hidden" name="_csrf" value="<?= csrf_token() ?>">
 
         <div class="form-group">
+            <label for="user_id"><?= t('bets.user') ?></label>
+            <select id="user_id" name="user_id" required>
+                <option value=""><?= t('bets.select_user') ?></option>
+                <?php foreach ($users as $u): ?>
+                    <?php $sel = (old('user_id', (string)$session['user_id']) == $u['id']) ? 'selected' : ''; ?>
+                    <option value="<?= (int)$u['id'] ?>" <?= $sel ?>>
+                        <?= e($u['first_name'] . ' ' . $u['last_name']) ?> (<?= e($u['email']) ?>)
+                    </option>
+                <?php endforeach; ?>
+            </select>
+            <?php foreach (($_SESSION['errors']['user_id'] ?? []) as $err): ?><div class="form-error"><?= e($err) ?></div><?php endforeach; ?>
+        </div>
+
+        <div class="form-group">
             <label for="game_id"><?= t('bets.game') ?></label>
-            <select id="game_id" name="game_id">
+            <select id="game_id" name="game_id" onchange="syncTypeOptions(this.value)">
                 <?php foreach ($games as $g): ?>
                     <?php $sel = (old('game_id', (string)$session['game_id']) == $g['id']) ? 'selected' : ''; ?>
-                    <option value="<?= (int)$g['id'] ?>" <?= $sel ?>><?= e($g['name']) ?></option>
+                    <option value="<?= (int)$g['id'] ?>" data-type="<?= e($g['type']) ?>" <?= $sel ?>><?= e($g['name']) ?></option>
                 <?php endforeach; ?>
             </select>
             <?php foreach (($_SESSION['errors']['game_id'] ?? []) as $err): ?><div class="form-error"><?= e($err) ?></div><?php endforeach; ?>
         </div>
 
-        <div class="form-row">
-            <div class="form-group">
-                <label for="bet_type"><?= t('bets.type') ?></label>
-                <input type="text" id="bet_type" name="bet_type" value="<?= old('bet_type', $session['bet_type']) ?>" maxlength="50" required>
-                <?php foreach (($_SESSION['errors']['bet_type'] ?? []) as $err): ?><div class="form-error"><?= e($err) ?></div><?php endforeach; ?>
-            </div>
-            <div class="form-group">
-                <label for="bet_value"><?= t('bets.value') ?></label>
-                <input type="text" id="bet_value" name="bet_value" value="<?= old('bet_value', $session['bet_value']) ?>" maxlength="100" required>
-                <?php foreach (($_SESSION['errors']['bet_value'] ?? []) as $err): ?><div class="form-error"><?= e($err) ?></div><?php endforeach; ?>
+        <div class="form-group">
+            <label for="bet_type"><?= t('bets.type') ?></label>
+            <?php $curType = old('bet_type', $session['bet_type']); ?>
+            <select id="bet_type" name="bet_type" onchange="switchBetValue(this.value)">
+                <option value="number" <?= $curType === 'number' ? 'selected' : '' ?>><?= t('game.number') ?></option>
+                <option value="color"  <?= $curType === 'color'  ? 'selected' : '' ?>><?= t('game.color') ?></option>
+                <option value="parity" <?= $curType === 'parity' ? 'selected' : '' ?>><?= t('game.parity') ?></option>
+                <option value="bet"    <?= $curType === 'bet'    ? 'selected' : '' ?>><?= t('bets.type_bet') ?></option>
+            </select>
+            <?php foreach (($_SESSION['errors']['bet_type'] ?? []) as $err): ?><div class="form-error"><?= e($err) ?></div><?php endforeach; ?>
+        </div>
+
+        <?php $curVal = old('bet_value', $session['bet_value']); ?>
+
+        <div id="bv-number" class="form-group bet-val-group <?= $curType === 'number' ? 'active' : '' ?>">
+            <label><?= t('game.number') ?> (0–36)</label>
+            <input type="number" name="bet_value_number" min="0" max="36" step="1"
+                   value="<?= $curType === 'number' ? (int)$curVal : 0 ?>">
+        </div>
+        <div id="bv-color" class="form-group bet-val-group <?= $curType === 'color' ? 'active' : '' ?>">
+            <label><?= t('game.color') ?></label>
+            <select name="bet_value_color">
+                <?php $cv = $curType === 'color' ? $curVal : 'red'; ?>
+                <option value="red"   <?= $cv === 'red'   ? 'selected' : '' ?>><?= t('game.red') ?></option>
+                <option value="black" <?= $cv === 'black' ? 'selected' : '' ?>><?= t('game.black') ?></option>
+            </select>
+        </div>
+        <div id="bv-parity" class="form-group bet-val-group <?= $curType === 'parity' ? 'active' : '' ?>">
+            <label><?= t('game.parity') ?></label>
+            <select name="bet_value_parity">
+                <?php $pv = $curType === 'parity' ? $curVal : 'even'; ?>
+                <option value="even" <?= $pv === 'even' ? 'selected' : '' ?>><?= t('game.even') ?></option>
+                <option value="odd"  <?= $pv === 'odd'  ? 'selected' : '' ?>><?= t('game.odd') ?></option>
+            </select>
+        </div>
+        <div id="bv-bet" class="bet-val-group <?= $curType === 'bet' ? 'active' : '' ?>">
+            <label style="display:block;margin-bottom:.4rem"><?= t('bets.reels') ?></label>
+            <?php
+                $comboChars = $curType === 'bet' ? preg_split('//u', $curVal, -1, PREG_SPLIT_NO_EMPTY) : [];
+                $comboChars = array_values(array_filter($comboChars));
+            ?>
+            <div class="form-row" style="gap:.5rem;flex-wrap:nowrap">
+                <?php foreach ([0,1,2] as $i): ?>
+                <div class="form-group">
+                    <label><?= t('bets.reel') ?> <?= $i + 1 ?></label>
+                    <select name="bet_reel_<?= $i + 1 ?>" style="font-size:1.4rem">
+                        <?php foreach ($symbols as $sym): ?>
+                            <option value="<?= e($sym) ?>" <?= ($comboChars[$i] ?? '') === $sym ? 'selected' : '' ?>><?= e($sym) ?></option>
+                        <?php endforeach; ?>
+                    </select>
+                </div>
+                <?php endforeach; ?>
             </div>
         </div>
+        <?php foreach (($_SESSION['errors']['bet_value'] ?? []) as $err): ?><div class="form-error"><?= e($err) ?></div><?php endforeach; ?>
 
         <div class="form-row">
             <div class="form-group">
@@ -66,4 +127,31 @@
     </form>
     <?php unset($_SESSION['errors'], $_SESSION['old']); ?>
 </div>
+
+<script>
+var gameTypes = {};
+document.querySelectorAll('#game_id option').forEach(function(o) {
+    gameTypes[o.value] = o.dataset.type;
+});
+
+function switchBetValue(type) {
+    ['number','color','parity','bet'].forEach(function(k) {
+        document.getElementById('bv-' + k).classList.toggle('active', k === type);
+    });
+}
+
+function syncTypeOptions(gameId) {
+    var gameType = gameTypes[gameId] || '';
+    var sel = document.getElementById('bet_type');
+    sel.querySelectorAll('option').forEach(function(o) {
+        o.hidden = (gameType === 'slots') ? (o.value !== 'bet') : (o.value === 'bet');
+    });
+    var first = Array.from(sel.options).find(function(o) { return !o.hidden; });
+    if (first) { sel.value = first.value; switchBetValue(first.value); }
+}
+
+switchBetValue(document.getElementById('bet_type').value);
+syncTypeOptions(document.getElementById('game_id').value);
+</script>
+
 <?php require dirname(__DIR__) . '/layout/footer.phtml'; ?>

@@ -3,22 +3,34 @@
 namespace App\Controllers;
 
 use App\Helpers\{Database, FileUploader, Validation};
-use App\Models\User;
+use App\Models\{AuditLog, User, Promotion};
+use App\Services\{KMeansService, PromotionService};
 
 class ProfileController extends BaseController
 {
-    private User $users;
+    private User             $users;
+    private PromotionService $promotions;
+    private Promotion        $promotionModel;
+    private KMeansService    $kmeans;
+    private AuditLog         $audit;
 
     public function __construct()
     {
-        $this->users = new User(Database::getInstance());
+        $pdo                  = Database::getInstance();
+        $this->users          = new User($pdo);
+        $this->promotions     = new PromotionService($pdo);
+        $this->promotionModel = new Promotion($pdo);
+        $this->kmeans         = new KMeansService($pdo);
+        $this->audit          = new AuditLog($pdo);
     }
 
     public function show(): void
     {
         $this->requireLogin();
-        $user = $this->users->findById((int)$_SESSION['user']['id']);
-        $this->view('profile/show', ['user' => $user]);
+        $userId  = (int)$_SESSION['user']['id'];
+        $user    = $this->users->findById($userId);
+        $segment = $this->kmeans->getSegmentForUser($userId);
+        $this->view('profile/show', compact('user', 'segment'));
     }
 
     public function update(): void
@@ -33,6 +45,7 @@ class ProfileController extends BaseController
 
         if (!$v->passes()) {
             $_SESSION['errors'] = $v->errors();
+            $_SESSION['old']    = $v->all();
             redirect('/profile');
         }
 
@@ -68,6 +81,15 @@ class ProfileController extends BaseController
         ]);
         $_SESSION['lang'] = $user['lang_preference'];
 
+        $this->audit->log(
+            $userId,
+            $user['first_name'] . ' ' . $user['last_name'],
+            'update_profile',
+            'users',
+            $userId,
+            'Profile updated: lang=' . $data['lang_preference'] . (isset($data['avatar_path']) ? ', avatar changed' : '')
+        );
+
         flash('success', t('auth.profile_updated'));
         redirect('/profile');
     }
@@ -84,11 +106,61 @@ class ProfileController extends BaseController
             FileUploader::delete($user['avatar_path']);
         }
 
+        $this->audit->log(
+            $userId,
+            ($user['first_name'] ?? '') . ' ' . ($user['last_name'] ?? ''),
+            'delete_account',
+            'users',
+            $userId,
+            'User account deleted: ' . ($user['email'] ?? '')
+        );
+
         $this->users->delete($userId);
         session_destroy();
         session_start();
-        flash('success', 'Konto zostało usunięte.');
+        flash('success', t('profile.deleted'));
         redirect('/login');
+    }
+
+    public function showDeposit(): void
+    {
+        $this->requireLogin();
+        $history = $this->promotionModel->userHistory((int)$_SESSION['user']['id']);
+        $this->view('profile/deposit', ['history' => $history]);
+    }
+
+    public function deposit(): void
+    {
+        $this->requireLogin();
+        $this->requireCsrf();
+
+        $v = (new Validation($_POST))
+            ->required('amount', t('deposit.amount'))
+            ->numeric('amount', t('deposit.amount'))
+            ->min('amount', 0.01, t('deposit.amount'));
+
+        if (!$v->passes()) {
+            $_SESSION['errors'] = $v->errors();
+            redirect('/profile/deposit');
+        }
+
+        $amount = (float)$v->get('amount');
+        $userId = (int)$_SESSION['user']['id'];
+
+        $this->users->updateBalance($userId, $amount);
+        $bonus = $this->promotions->grantDepositBonus($userId, $amount);
+
+        // Refresh session balance
+        $user = $this->users->findById($userId);
+        $_SESSION['user']['balance'] = $user['balance'];
+
+        $msg = sprintf(t('deposit.success'), number_format($amount, 2));
+        if ($bonus > 0) {
+            $msg .= ' ' . sprintf(t('promo.deposit_bonus_granted'), number_format($bonus, 2));
+        }
+
+        flash('success', $msg);
+        redirect('/profile/deposit');
     }
 
     public function serveAvatar(string $filename): void

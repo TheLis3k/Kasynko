@@ -40,7 +40,8 @@ set_exception_handler(function (Throwable $e) {
 use App\Helpers\Router;
 use App\Controllers\{
     AuthController, ProfileController, RouletteController,
-    SlotController, BetController, AdminController, ErrorController
+    SlotController, BetController, AdminController, CroupierController,
+    DiceController, ErrorController
 };
 
 $router = new Router();
@@ -70,16 +71,25 @@ $router->post('/logout',  fn() => (new AuthController())->logout());
 // Home → redirect based on login state
 $router->get('/', function (): void {
     if (\App\Helpers\AuthMiddleware::isLoggedIn()) {
-        redirect('/bets');
+        redirect('/games');
     } else {
         redirect('/login');
     }
 });
 
+// Games lobby
+$router->get('/games', function (): void {
+    \App\Helpers\AuthMiddleware::requireLogin();
+    $viewFile = BASE_PATH . '/views/games/index.phtml';
+    require $viewFile;
+});
+
 // Profile
-$router->get('/profile',            fn() => (new ProfileController())->show());
-$router->post('/profile',           fn() => (new ProfileController())->update());
-$router->post('/profile/delete',    fn() => (new ProfileController())->delete());
+$router->get('/profile',              fn() => (new ProfileController())->show());
+$router->post('/profile',             fn() => (new ProfileController())->update());
+$router->post('/profile/delete',      fn() => (new ProfileController())->delete());
+$router->get('/profile/deposit',      fn() => (new ProfileController())->showDeposit());
+$router->post('/profile/deposit',     fn() => (new ProfileController())->deposit());
 $router->get('/profile/avatar/{filename}', fn(array $p) => (new ProfileController())->serveAvatar($p['filename']));
 
 // Games
@@ -87,6 +97,11 @@ $router->get('/roulette',  fn() => (new RouletteController())->show());
 $router->post('/roulette', fn() => (new RouletteController())->play());
 $router->get('/slots',     fn() => (new SlotController())->show());
 $router->post('/slots',    fn() => (new SlotController())->play());
+$router->get('/dice',      fn() => (new DiceController())->show());
+$router->post('/dice',     fn() => (new DiceController())->play());
+
+// Croupier
+$router->get('/croupier',  fn() => (new CroupierController())->dashboard());
 
 // Bets CRUD
 $router->get('/bets',              fn() => (new BetController())->index());
@@ -98,8 +113,12 @@ $router->post('/bets/{id}/delete', fn(array $p) => (new BetController())->delete
 $router->get('/bets/export',       fn() => (new BetController())->export());
 
 // Admin
-$router->get('/admin',         fn() => (new AdminController())->dashboard());
-$router->get('/admin/reports', fn() => (new AdminController())->reports());
+$router->get('/admin',                   fn() => (new AdminController())->dashboard());
+$router->get('/admin/reports',           fn() => (new AdminController())->reports());
+$router->get('/admin/segments',          fn() => (new AdminController())->segments());
+$router->post('/admin/segments/run',     fn() => (new AdminController())->runClustering());
+$router->get('/admin/promotions',        fn() => (new AdminController())->promotions());
+$router->post('/admin/promotions/award', fn() => (new AdminController())->awardReward());
 
 // Dispatch
 $router->dispatch(

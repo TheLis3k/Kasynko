@@ -4,14 +4,14 @@ namespace App\Controllers;
 
 use App\Helpers\{Database, Validation};
 use App\Models\{AuditLog, User, Game, GameSession};
-use App\Services\SlotMachine;
+use App\Services\DiceGame;
 
-class SlotController extends BaseController
+class DiceController extends BaseController
 {
     private User        $users;
     private Game        $games;
     private GameSession $sessions;
-    private SlotMachine $machine;
+    private DiceGame    $dice;
     private AuditLog    $audit;
 
     public function __construct()
@@ -20,18 +20,18 @@ class SlotController extends BaseController
         $this->users    = new User($pdo);
         $this->games    = new Game($pdo);
         $this->sessions = new GameSession($pdo);
-        $this->machine  = new SlotMachine();
+        $this->dice     = new DiceGame();
         $this->audit    = new AuditLog($pdo);
     }
 
     public function show(): void
     {
         $this->requireLogin();
-        $this->view('games/slots', [
-            'result'       => $_SESSION['slots_result'] ?? null,
-            'payout_table' => SlotMachine::payoutTable(),
+        $this->view('games/dice', [
+            'result'       => $_SESSION['dice_result'] ?? null,
+            'payout_table' => DiceGame::payoutTable(),
         ]);
-        unset($_SESSION['slots_result']);
+        unset($_SESSION['dice_result']);
     }
 
     public function play(): void
@@ -43,22 +43,27 @@ class SlotController extends BaseController
         $user   = $this->users->findById($userId);
 
         $v = (new Validation($_POST))
+            ->required('bet_type',   t('game.bet_type'))
+            ->inList('bet_type',     ['total', 'high_low', 'parity'], t('game.bet_type'))
             ->required('bet_amount', t('game.bet_amount'))
-            ->numeric('bet_amount', t('game.bet_amount'))
-            ->min('bet_amount', 0.01, t('game.bet_amount'));
+            ->numeric('bet_amount',  t('game.bet_amount'))
+            ->min('bet_amount',      0.01, t('game.bet_amount'));
 
         if (!$v->passes()) {
             flash('error', implode(' ', array_merge(...array_values($v->errors()))));
-            redirect('/slots');
+            redirect('/dice');
         }
 
-        $amount = (float)$v->get('bet_amount');
+        $amount   = (float)$v->get('bet_amount');
+        $betType  = $v->get('bet_type');
+        $betValue = $this->resolveBetValue($betType);
+
         if ((float)$user['balance'] < $amount) {
             flash('error', t('game.insufficient'));
-            redirect('/slots');
+            redirect('/dice');
         }
 
-        $result  = $this->machine->play($amount);
+        $result  = $this->dice->play($betType, $betValue, $amount);
         $payout  = $result['payout'];
         $outcome = $result['is_win'] ? 'win' : 'lose';
         $delta   = $payout - $amount;
@@ -66,12 +71,12 @@ class SlotController extends BaseController
         $db = Database::getInstance();
         $db->beginTransaction();
         try {
-            $game = $this->games->findByType('slots');
+            $game = $this->games->findByType('dice');
             $this->sessions->create([
                 'user_id'    => $userId,
                 'game_id'    => $game['id'],
-                'bet_type'   => 'bet',
-                'bet_value'  => $result['combo'],
+                'bet_type'   => $betType,
+                'bet_value'  => $betValue,
                 'bet_amount' => $amount,
                 'outcome'    => $outcome,
                 'payout'     => $payout,
@@ -89,13 +94,28 @@ class SlotController extends BaseController
         $this->audit->log(
             $userId,
             $_SESSION['user']['first_name'] . ' ' . $_SESSION['user']['last_name'],
-            'play_slots',
+            'play_dice',
             'game_session',
             null,
-            ($outcome === 'win' ? 'WIN' : 'LOSE') . ' — bet=' . $amount . ' payout=' . $payout . ' combo=' . $result['combo']
+            ($outcome === 'win' ? 'WIN' : 'LOSE') . ' — bet=' . $amount . ' payout=' . $payout
+                . ' type=' . $betType . '/' . $betValue . ' sum=' . $result['sum']
         );
 
-        $_SESSION['slots_result'] = array_merge($result, ['bet_amount' => $amount]);
-        redirect('/slots');
+        $_SESSION['dice_result'] = array_merge($result, ['bet_amount' => $amount]);
+        redirect('/dice');
+    }
+
+    private function resolveBetValue(string $betType): string
+    {
+        return match ($betType) {
+            'total'    => (string)(int)($_POST['bet_value_total'] ?? 7),
+            'high_low' => in_array($_POST['bet_value_hl'] ?? '', ['high', 'low'], true)
+                              ? $_POST['bet_value_hl']
+                              : 'high',
+            'parity'   => in_array($_POST['bet_value_parity'] ?? '', ['even', 'odd'], true)
+                              ? $_POST['bet_value_parity']
+                              : 'even',
+            default    => '',
+        };
     }
 }

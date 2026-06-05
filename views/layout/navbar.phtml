@@ -2,13 +2,21 @@
     <a class="navbar__brand" href="/">&spades; Kasyno</a>
     <ul class="navbar__links">
 <?php if (\App\Helpers\AuthMiddleware::isLoggedIn()): ?>
+        <li><a href="/games"><?= t('nav.games') ?></a></li>
         <li><a href="/roulette"><?= t('nav.roulette') ?></a></li>
         <li><a href="/slots"><?= t('nav.slots') ?></a></li>
+        <li><a href="/dice"><?= t('nav.dice') ?></a></li>
         <li><a href="/bets"><?= t('nav.bets') ?></a></li>
-<?php if (($_SESSION['user']['role'] ?? '') === 'admin'): ?>
+<?php $role = $_SESSION['user']['role'] ?? ''; ?>
+<?php if ($role === 'admin'): ?>
         <li><a href="/admin"><?= t('nav.admin') ?></a></li>
+        <li><a href="/admin/segments"><?= t('nav.segments') ?></a></li>
+        <li><a href="/admin/promotions"><?= t('nav.promotions') ?></a></li>
+<?php elseif ($role === 'croupier'): ?>
+        <li><a href="/croupier"><?= t('nav.croupier') ?></a></li>
 <?php endif; ?>
         <li><a href="/profile"><?= t('nav.profile') ?></a></li>
+        <li><a href="/profile/deposit"><?= t('nav.deposit') ?></a></li>
         <li class="navbar__balance"><?= t('nav.balance') ?>: <strong><?= e(number_format((float)($_SESSION['user']['balance'] ?? 0), 2)) ?></strong></li>
         <li>
             <form method="post" action="/logout" style="display:inline">

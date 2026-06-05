@@ -1,0 +1,58 @@
+<?php $pageTitle = t('deposit.title'); require dirname(__DIR__) . '/layout/header.phtml'; ?>
+<div style="display:flex;gap:1.5rem;flex-wrap:wrap;align-items:flex-start">
+
+    <div class="card" style="flex:1;min-width:280px;max-width:400px">
+        <div class="card__title"><?= t('deposit.title') ?></div>
+        <p style="color:var(--color-text-muted);font-size:.875rem;margin-bottom:1rem">
+            <?= t('deposit.desc') ?>
+        </p>
+
+        <form method="post" action="/profile/deposit" novalidate>
+            <input type="hidden" name="_csrf" value="<?= csrf_token() ?>">
+
+            <div class="form-group">
+                <label for="amount"><?= t('deposit.amount') ?></label>
+                <input type="number" id="amount" name="amount" min="0.01" step="0.01"
+                       value="<?= e(old('amount', '')) ?>" required>
+                <?php foreach (($_SESSION['errors']['amount'] ?? []) as $err): ?>
+                    <div class="form-error"><?= e($err) ?></div>
+                <?php endforeach; ?>
+            </div>
+
+            <button type="submit" class="btn btn--primary"><?= t('deposit.submit') ?></button>
+        </form>
+        <?php unset($_SESSION['errors']); ?>
+    </div>
+
+    <div class="card" style="flex:2;min-width:300px">
+        <div class="card__title"><?= t('promo.history') ?></div>
+        <?php if (empty($history)): ?>
+            <p style="color:var(--color-text-muted)"><?= t('promo.no_history') ?></p>
+        <?php else: ?>
+            <div class="table-wrap">
+                <table>
+                    <thead>
+                        <tr>
+                            <th><?= t('bets.date') ?></th>
+                            <th><?= t('promo.promotion_name') ?></th>
+                            <th><?= t('promo.amount_awarded') ?></th>
+                            <th><?= t('bets.note') ?></th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                    <?php foreach ($history as $row): ?>
+                        <tr>
+                            <td><?= e(substr($row['created_at'], 0, 16)) ?></td>
+                            <td><?= e($row['promotion_name']) ?></td>
+                            <td class="badge badge--win">+<?= number_format((float)$row['amount_awarded'], 2) ?></td>
+                            <td><?= e($row['note'] ?? '') ?></td>
+                        </tr>
+                    <?php endforeach; ?>
+                    </tbody>
+                </table>
+            </div>
+        <?php endif; ?>
+    </div>
+
+</div>
+<?php require dirname(__DIR__) . '/layout/footer.phtml'; ?>

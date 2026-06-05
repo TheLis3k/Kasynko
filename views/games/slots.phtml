@@ -1,4 +1,22 @@
 <?php $pageTitle = t('nav.slots'); require dirname(__DIR__) . '/layout/header.phtml'; ?>
+<style>
+.slots-display{
+    display:flex;gap:.6rem;justify-content:center;margin-bottom:1rem
+}
+.reel{
+    width:72px;height:80px;display:flex;align-items:center;justify-content:center;
+    font-size:2.2rem;border-radius:8px;
+    background:rgba(255,255,255,.07);border:2px solid var(--color-gold);
+}
+.reel.spin{animation:reelSpin .6s ease-out}
+@keyframes reelSpin{
+    0%  {transform:translateY(-30px);opacity:0}
+    60% {transform:translateY(4px);opacity:1}
+    80% {transform:translateY(-2px)}
+    100%{transform:translateY(0)}
+}
+</style>
+
 <div class="game-wrap">
     <div class="card">
         <div class="card__title">&#127922; <?= t('nav.slots') ?></div>
@@ -7,7 +25,7 @@
         <div style="text-align:center;margin-bottom:1.5rem">
             <div class="slots-display">
                 <?php foreach ($result['reels'] as $symbol): ?>
-                    <div class="reel"><?= e($symbol) ?></div>
+                    <div class="reel spin"><?= e($symbol) ?></div>
                 <?php endforeach; ?>
             </div>
             <?php if ($result['is_win']): ?>
@@ -25,15 +43,16 @@
             <input type="hidden" name="_csrf" value="<?= csrf_token() ?>">
             <div class="form-group">
                 <label for="bet_amount"><?= t('game.bet_amount') ?></label>
-                <input type="number" id="bet_amount" name="bet_amount" min="0.01" step="0.01" value="10" required>
+                <input type="number" id="bet_amount" name="bet_amount" min="0.01" step="0.01"
+                       value="<?= number_format((float)($result['bet_amount'] ?? 10), 2, '.', '') ?>" required>
             </div>
             <button type="submit" class="btn btn--gold" style="width:100%"><?= t('game.spin') ?></button>
         </form>
 
         <div style="margin-top:1.5rem">
-            <h3 style="color:var(--color-gold);font-size:.95rem;margin-bottom:.6rem">Tabela wypłat</h3>
+            <h3 style="color:var(--color-gold);font-size:.95rem;margin-bottom:.6rem"><?= t('game.payout_table') ?></h3>
             <table>
-                <thead><tr><th>Kombinacja</th><th>Mnożnik</th></tr></thead>
+                <thead><tr><th><?= t('game.combination') ?></th><th><?= t('game.multiplier') ?></th></tr></thead>
                 <tbody>
                 <?php foreach ($payout_table as $combo => $multiplier): ?>
                     <tr>

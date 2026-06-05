@@ -15,7 +15,9 @@ function arrow(string $col, string $currentSort, string $currentDir): string {
 
 <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:1rem">
     <h1 style="font-size:1.4rem;color:var(--color-gold)"><?= t('bets.title') ?></h1>
-    <a href="/bets/create" class="btn btn--primary btn--sm"><?= t('bets.add') ?></a>
+    <?php if ($isAdmin): ?>
+        <a href="/bets/create" class="btn btn--primary btn--sm"><?= t('bets.add') ?></a>
+    <?php endif; ?>
 </div>
 
 <!-- Summary stats -->
@@ -41,6 +43,19 @@ function arrow(string $col, string $currentSort, string $currentDir): string {
 <!-- Filter bar -->
 <div class="filter-bar">
     <form method="get" action="/bets">
+        <?php if ($isAdmin): ?>
+        <div class="form-group">
+            <label><?= t('bets.user') ?></label>
+            <select name="user_id">
+                <option value=""><?= t('bets.all_users') ?></option>
+                <?php foreach ($users as $u): ?>
+                    <option value="<?= (int)$u['id'] ?>" <?= ($filters['user_id'] ?? '') == $u['id'] ? 'selected' : '' ?>>
+                        <?= e($u['first_name'] . ' ' . $u['last_name']) ?> (<?= e($u['email']) ?>)
+                    </option>
+                <?php endforeach; ?>
+            </select>
+        </div>
+        <?php endif; ?>
         <div class="form-group">
             <label><?= t('bets.search') ?></label>
             <input type="text" name="search" value="<?= e($filters['search']) ?>" placeholder="...">
@@ -89,6 +104,7 @@ function arrow(string $col, string $currentSort, string $currentDir): string {
     <?php $exportBase = '/bets/export?' . http_build_query(array_merge($filters, ['sort' => $sort, 'dir' => $dir])); ?>
     <a href="<?= e($exportBase . '&format=csv') ?>" class="btn btn--outline btn--sm"><?= t('bets.export_csv') ?></a>
     <a href="<?= e($exportBase . '&format=json') ?>" class="btn btn--outline btn--sm"><?= t('bets.export_json') ?></a>
+    <a href="<?= e($exportBase . '&format=pdf') ?>" class="btn btn--outline btn--sm"><?= t('bets.export_pdf') ?></a>
 </div>
 
 <!-- Table -->
@@ -103,7 +119,9 @@ function arrow(string $col, string $currentSort, string $currentDir): string {
                 <th><a href="<?= e(sortUrl('payout', $sort, $dir, $filters)) ?>"><?= t('bets.payout') ?><?= arrow('payout', $sort, $dir) ?></a></th>
                 <th><?= t('bets.game') ?></th>
                 <th><a href="<?= e(sortUrl('created_at', $sort, $dir, $filters)) ?>"><?= t('bets.date') ?><?= arrow('created_at', $sort, $dir) ?></a></th>
+                <?php if ($isAdmin): ?>
                 <th><?= t('general.actions') ?></th>
+                <?php endif; ?>
             </tr>
         </thead>
         <tbody>
@@ -119,6 +137,7 @@ function arrow(string $col, string $currentSort, string $currentDir): string {
                 <td><?= number_format((float)$row['payout'], 2) ?></td>
                 <td><?= e($row['game_name']) ?></td>
                 <td><?= e(substr($row['created_at'], 0, 16)) ?></td>
+                <?php if ($isAdmin): ?>
                 <td style="white-space:nowrap">
                     <a href="/bets/<?= (int)$row['id'] ?>/edit" class="btn btn--outline btn--sm"><?= t('general.edit') ?></a>
                     <form method="post" action="/bets/<?= (int)$row['id'] ?>/delete" style="display:inline"
@@ -127,6 +146,7 @@ function arrow(string $col, string $currentSort, string $currentDir): string {
                         <button type="submit" class="btn btn--danger btn--sm"><?= t('general.delete') ?></button>
                     </form>
                 </td>
+                <?php endif; ?>
             </tr>
             <?php endforeach; ?>
         <?php endif; ?>
@@ -150,7 +170,7 @@ function arrow(string $col, string $currentSort, string $currentDir): string {
     <?php if ($page < $result['pages']): ?>
         <a href="?<?= http_build_query(array_merge($filters, ['sort' => $sort, 'dir' => $dir, 'page' => $page + 1])) ?>"><?= t('pagination.next') ?></a>
     <?php endif; ?>
-    <span style="color:var(--color-text-muted);font-size:.8rem"><?= $result['total'] ?> rekordów</span>
+    <span style="color:var(--color-text-muted);font-size:.8rem"><?= sprintf(t('bets.records_count'), $result['total']) ?></span>
 </div>
 <?php endif; ?>
 

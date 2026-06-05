@@ -1,0 +1,131 @@
+<?php $pageTitle = t('nav.dice'); require dirname(__DIR__) . '/layout/header.phtml'; ?>
+<style>
+.dice-result{text-align:center;margin-bottom:1.5rem}
+.dice-wrap{display:inline-flex;gap:1.5rem;justify-content:center;margin-bottom:.8rem}
+.die{
+    display:inline-flex;align-items:center;justify-content:center;
+    width:72px;height:72px;border-radius:12px;
+    font-size:2.2rem;font-weight:700;color:#fff;
+    background:var(--color-surface);
+    border:3px solid var(--color-gold);
+}
+.die.spin{animation:dieSpin .6s cubic-bezier(.17,.67,.83,.67)}
+@keyframes dieSpin{
+    0%{transform:rotate(0)scale(1)}
+    40%{transform:rotate(360deg)scale(1.15)}
+    100%{transform:rotate(360deg)scale(1)}
+}
+.bet-value-group{display:none}
+.bet-value-group.active{display:block}
+.dice-faces{font-size:2rem}
+</style>
+
+<div class="game-wrap">
+    <div class="card">
+        <div class="card__title">&#127922; <?= t('nav.dice') ?></div>
+
+        <?php if ($result): ?>
+        <div class="dice-result">
+            <div class="dice-wrap">
+                <div class="die spin"><?= $result['die1'] ?></div>
+                <div class="die spin"><?= $result['die2'] ?></div>
+            </div>
+            <p><?= t('game.dice_sum') ?>: <strong style="font-size:1.3rem"><?= $result['sum'] ?></strong></p>
+            <?php if ($result['is_win']): ?>
+                <p style="color:var(--color-success);font-size:1.2rem;font-weight:700">
+                    <?= t('game.win') ?> &mdash; <?= t('game.payout') ?>: <strong><?= number_format((float)$result['payout'], 2) ?></strong>
+                    <small style="font-size:.85rem">(×<?= $result['multiplier'] ?>)</small>
+                </p>
+            <?php else: ?>
+                <p style="color:var(--color-error);font-size:1.1rem"><?= t('game.lose') ?></p>
+            <?php endif; ?>
+        </div>
+        <?php endif; ?>
+
+        <form method="post" action="/dice">
+            <input type="hidden" name="_csrf" value="<?= csrf_token() ?>">
+
+            <div class="form-group">
+                <label for="bet_type"><?= t('game.bet_type') ?></label>
+                <select id="bet_type" name="bet_type" onchange="switchDiceBetType(this.value)">
+                    <?php $lastType = $result['bet_type'] ?? 'total'; ?>
+                    <option value="total"    <?= $lastType === 'total'    ? 'selected' : '' ?>><?= t('game.dice_total') ?></option>
+                    <option value="high_low" <?= $lastType === 'high_low' ? 'selected' : '' ?>><?= t('game.dice_high_low') ?></option>
+                    <option value="parity"   <?= $lastType === 'parity'   ? 'selected' : '' ?>><?= t('game.dice_parity') ?></option>
+                </select>
+            </div>
+
+            <!-- Exact sum -->
+            <div id="val-total" class="form-group bet-value-group <?= $lastType === 'total' ? 'active' : '' ?>">
+                <label><?= t('game.dice_bet_total') ?> (2–12)</label>
+                <input type="number" name="bet_value_total" min="2" max="12" step="1"
+                       value="<?= ($lastType === 'total') ? (int)($result['bet_value'] ?? 7) : 7 ?>">
+            </div>
+
+            <!-- High / Low -->
+            <div id="val-high_low" class="form-group bet-value-group <?= $lastType === 'high_low' ? 'active' : '' ?>">
+                <label><?= t('game.dice_high_low') ?></label>
+                <select name="bet_value_hl">
+                    <?php $lastHl = ($lastType === 'high_low') ? ($result['bet_value'] ?? 'high') : 'high'; ?>
+                    <option value="high" <?= $lastHl === 'high' ? 'selected' : '' ?>><?= t('game.dice_high') ?></option>
+                    <option value="low"  <?= $lastHl === 'low'  ? 'selected' : '' ?>><?= t('game.dice_low') ?></option>
+                </select>
+                <small style="color:var(--color-text-muted);font-size:.75rem"><?= t('game.dice_7_loses') ?></small>
+            </div>
+
+            <!-- Parity -->
+            <div id="val-parity" class="form-group bet-value-group <?= $lastType === 'parity' ? 'active' : '' ?>">
+                <label><?= t('game.dice_parity') ?></label>
+                <select name="bet_value_parity">
+                    <?php $lastParity = ($lastType === 'parity') ? ($result['bet_value'] ?? 'even') : 'even'; ?>
+                    <option value="even" <?= $lastParity === 'even' ? 'selected' : '' ?>><?= t('game.even') ?></option>
+                    <option value="odd"  <?= $lastParity === 'odd'  ? 'selected' : '' ?>><?= t('game.odd') ?></option>
+                </select>
+            </div>
+
+            <div class="form-group">
+                <label for="bet_amount"><?= t('game.bet_amount') ?></label>
+                <input type="number" id="bet_amount" name="bet_amount" min="0.01" step="0.01"
+                       value="<?= number_format((float)($result['bet_amount'] ?? 10), 2, '.', '') ?>" required>
+            </div>
+
+            <button type="submit" class="btn btn--gold" style="width:100%"><?= t('game.place_bet') ?></button>
+        </form>
+    </div>
+
+    <!-- Payout table -->
+    <div class="card" style="margin-top:1.5rem">
+        <div class="card__title"><?= t('game.payout_table_dice') ?></div>
+        <div class="table-wrap">
+            <table>
+                <thead>
+                    <tr>
+                        <th><?= t('game.combination') ?></th>
+                        <th><?= t('game.multiplier') ?></th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr><td><?= t('game.dice_high_desc') ?></td><td>×2</td></tr>
+                    <tr><td><?= t('game.dice_low_desc') ?></td><td>×2</td></tr>
+                    <tr><td><?= t('game.even') ?> / <?= t('game.odd') ?></td><td>×2</td></tr>
+                    <?php foreach ($payout_table as $sum => $mult): ?>
+                    <tr>
+                        <td><?= t('game.dice_bet_total') ?> = <?= $sum ?></td>
+                        <td>×<?= $mult ?></td>
+                    </tr>
+                    <?php endforeach; ?>
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<script>
+function switchDiceBetType(type) {
+    ['total','high_low','parity'].forEach(function(t) {
+        document.getElementById('val-' + t).classList.toggle('active', t === type);
+    });
+}
+</script>
+
+<?php require dirname(__DIR__) . '/layout/footer.phtml'; ?>

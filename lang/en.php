@@ -24,6 +24,14 @@ return [
     'auth.terms'            => 'I accept the terms',
     'auth.profile_updated'  => 'Profile updated.',
 
+    // Games panel
+    'nav.games'          => 'Games',
+    'games.welcome'      => 'Welcome to the casino!',
+    'games.choose'       => 'Choose a game to play.',
+    'games.play'         => 'Play',
+    'games.roulette_desc'=> 'Bet on a number, colour or parity. Win up to ×35!',
+    'games.slots_desc'   => 'Spin the reels and win multipliers. Try your luck!',
+
     // Navigation
     'nav.home'       => 'Home',
     'nav.roulette'   => 'Roulette',
@@ -45,6 +53,9 @@ return [
     'game.insufficient'  => 'Insufficient balance.',
     'game.winning_number'=> 'Winning number',
     'game.reels'         => 'Reels',
+    'game.payout_table'  => 'Payout table',
+    'game.combination'   => 'Combination',
+    'game.multiplier'    => 'Multiplier',
     'game.number'        => 'Number (0–36)',
     'game.color'         => 'Color',
     'game.parity'        => 'Even/Odd',
@@ -70,6 +81,7 @@ return [
     'bets.payout'        => 'Payout',
     'bets.date'          => 'Date',
     'bets.note'          => 'Note',
+    'bets.document'      => 'Document / screenshot (PDF or image, optional)',
     'bets.search'        => 'Search',
     'bets.filter'        => 'Filter',
     'bets.date_from'     => 'Date from',
@@ -82,7 +94,13 @@ return [
     'bets.total_payout'  => 'Total payout',
     'bets.net'           => 'Net revenue',
     'bets.count'         => 'Bet count',
+    'bets.user'          => 'User',
+    'bets.select_user'   => '— Select user —',
+    'bets.all_users'     => '— All users —',
     'bets.all_games'     => '— All games —',
+    'bets.type_bet'      => 'Bet (Slot Machine)',
+    'bets.reels'         => 'Reels',
+    'bets.reel'          => 'Reel',
     'bets.win'           => 'Win',
     'bets.lose'          => 'Loss',
     'bets.all_outcomes'  => '— All outcomes —',
@@ -125,6 +143,49 @@ return [
     'pagination.next' => 'Next »',
     'pagination.of'   => 'of',
 
+    // K-means segmentation
+    'kmeans.title'            => 'Player Segmentation (K-means)',
+    'kmeans.run'              => 'Run clustering',
+    'kmeans.no_results'       => 'No results — click "Run clustering".',
+    'kmeans.not_enough_players' => 'Not enough players to cluster (minimum 3).',
+    'kmeans.clustered'        => 'Clustered %d players.',
+    'kmeans.results_table'    => 'Segmentation results',
+    'kmeans.segment'          => 'Segment',
+    'kmeans.avg_bet'          => 'Avg bet',
+    'kmeans.total_games'      => 'Games played',
+    'kmeans.win_loss_ratio'   => 'W/L ratio',
+    'kmeans.clustered_at'     => 'Clustered at',
+
+    // Promotions
+    'promo.title'                  => 'Promotions & Rewards',
+    'promo.top_spenders'           => 'Top players — rewards',
+    'promo.top_spenders_desc'      => 'Manually award a reward to top spending players.',
+    'promo.award'                  => 'Award reward',
+    'promo.already_rewarded'       => 'Rewarded',
+    'promo.confirm_award'          => 'Award reward to this player?',
+    'promo.note_placeholder'       => 'Note (optional)',
+    'promo.reward_granted'         => 'Reward %.2f granted.',
+    'promo.reward_not_configured'  => 'No active "reward" promotion found.',
+    'promo.user_not_found'         => 'Player not found.',
+    'promo.welcome_granted'        => 'Welcome bonus +%s added to your account!',
+    'promo.deposit_bonus_granted'  => 'Deposit bonus +%s!',
+    'promo.history'                => 'Bonus history',
+    'promo.no_history'             => 'No bonuses awarded yet.',
+    'promo.promotion_name'         => 'Promotion',
+    'promo.amount_awarded'         => 'Amount',
+
+    // Deposit
+    'deposit.title'   => 'Top up account',
+    'deposit.desc'    => 'Top up your account by any amount. Deposit bonus applied automatically.',
+    'deposit.amount'  => 'Deposit amount',
+    'deposit.submit'  => 'Deposit',
+    'deposit.success' => 'Deposited %.2f to your account.',
+
+    // Navigation (deposit link)
+    'nav.deposit'     => 'Top up',
+    'nav.segments'    => 'Segmentation',
+    'nav.promotions'  => 'Promotions',
+
     // General
     'general.save'   => 'Save',
     'general.cancel' => 'Cancel',
@@ -134,4 +195,49 @@ return [
     'general.edit'   => 'Edit',
     'general.delete' => 'Delete',
     'general.confirm_delete' => 'Are you sure you want to delete?',
+
+    // Fixes for previously hardcoded strings
+    'admin.last_played'      => 'Last game',
+    'bets.records_count'     => '%d records',
+    'auth.welcome_bonus_hint'=> 'Welcome bonus: 500 tokens upon registration!',
+    'profile.deleted'        => 'Account deleted.',
+    'error.500_title'        => 'Internal Server Error',
+    'error.500_team'         => 'Our team of clever monkeys is working on it. Please share this code:',
+    'error.500_home'         => 'Back to home page',
+
+    // Dice game
+    'nav.dice'            => 'Dice',
+    'games.dice_desc'     => 'Roll two dice and bet on the sum, high/low or parity.',
+    'game.dice_total'     => 'Exact sum (2–12)',
+    'game.dice_high_low'  => 'High/Low',
+    'game.dice_high'      => 'High (8–12)',
+    'game.dice_low'       => 'Low (2–6)',
+    'game.dice_parity'    => 'Even/Odd',
+    'game.dice_bet_total' => 'Sum',
+    'game.dice1'          => 'Die 1',
+    'game.dice2'          => 'Die 2',
+    'game.dice_result'    => 'Roll result',
+    'game.dice_sum'       => 'Sum',
+    'game.payout_table_dice' => 'Payout table — Dice',
+    'game.dice_high_desc' => 'High: sum 8–12',
+    'game.dice_low_desc'  => 'Low: sum 2–6',
+    'game.dice_7_loses'   => '(7 loses on high/low)',
+
+    // Croupier panel
+    'nav.croupier'         => 'Croupier panel',
+    'croupier.title'       => 'Croupier Panel',
+    'croupier.desc'        => 'Player activity overview — read-only mode.',
+    'croupier.live_stats'  => 'Live statistics',
+
+    // Audit log
+    'admin.audit_log'      => 'Event log',
+    'audit.action'         => 'Action',
+    'audit.entity'         => 'Entity',
+    'audit.actor'          => 'User',
+    'audit.description'    => 'Description',
+    'audit.date'           => 'Date',
+    'audit.no_entries'     => 'No entries.',
+
+    // PDF export
+    'bets.export_pdf'      => 'Export PDF',
 ];

@@ -12,6 +12,11 @@
             <strong><?= e($user['first_name'] . ' ' . $user['last_name']) ?></strong><br>
             <span style="color:var(--color-text-muted);font-size:.85rem"><?= e($user['email']) ?></span><br>
             <span class="badge badge--win" style="margin-top:.3rem"><?= e($user['role']) ?></span>
+            <?php if (!empty($segment)): ?>
+                <span class="badge badge--segment" style="margin-top:.3rem" title="<?= e(t('kmeans.clustered_at')) ?>: <?= e(substr($segment['clustered_at'], 0, 10)) ?>">
+                    <?= e(t('kmeans.segment')) ?>: <?= e($segment['segment']) ?>
+                </span>
+            <?php endif; ?>
         </div>
     </div>
 
@@ -21,14 +26,14 @@
         <div class="form-row">
             <div class="form-group">
                 <label for="first_name"><?= t('auth.first_name') ?></label>
-                <input type="text" id="first_name" name="first_name" value="<?= e($user['first_name']) ?>" maxlength="100" required>
+                <input type="text" id="first_name" name="first_name" value="<?= e(old('first_name', $user['first_name'])) ?>" maxlength="100" required>
                 <?php foreach (($_SESSION['errors']['first_name'] ?? []) as $err): ?>
                     <div class="form-error"><?= e($err) ?></div>
                 <?php endforeach; ?>
             </div>
             <div class="form-group">
                 <label for="last_name"><?= t('auth.last_name') ?></label>
-                <input type="text" id="last_name" name="last_name" value="<?= e($user['last_name']) ?>" maxlength="100" required>
+                <input type="text" id="last_name" name="last_name" value="<?= e(old('last_name', $user['last_name'])) ?>" maxlength="100" required>
                 <?php foreach (($_SESSION['errors']['last_name'] ?? []) as $err): ?>
                     <div class="form-error"><?= e($err) ?></div>
                 <?php endforeach; ?>
@@ -38,8 +43,9 @@
         <div class="form-group">
             <label for="lang_preference"><?= t('auth.language') ?></label>
             <select id="lang_preference" name="lang_preference">
-                <option value="pl" <?= $user['lang_preference'] === 'pl' ? 'selected' : '' ?>><?= t('auth.lang_pl') ?></option>
-                <option value="en" <?= $user['lang_preference'] === 'en' ? 'selected' : '' ?>><?= t('auth.lang_en') ?></option>
+                <?php $langVal = old('lang_preference', $user['lang_preference']); ?>
+                <option value="pl" <?= $langVal === 'pl' ? 'selected' : '' ?>><?= t('auth.lang_pl') ?></option>
+                <option value="en" <?= $langVal === 'en' ? 'selected' : '' ?>><?= t('auth.lang_en') ?></option>
             </select>
         </div>
 
@@ -50,7 +56,7 @@
 
         <button type="submit" class="btn btn--primary"><?= t('general.save') ?></button>
     </form>
-    <?php unset($_SESSION['errors']); ?>
+    <?php unset($_SESSION['errors'], $_SESSION['old']); ?>
 
     <hr style="margin:1.5rem 0;border-color:rgba(255,255,255,.07)">
 

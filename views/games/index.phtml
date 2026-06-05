@@ -1,0 +1,32 @@
+<?php $pageTitle = t('nav.games'); require dirname(__DIR__) . '/layout/header.phtml'; ?>
+<div style="text-align:center;margin-bottom:2rem">
+    <h1 style="font-size:1.8rem;color:var(--color-gold);margin-bottom:.4rem"><?= t('games.welcome') ?></h1>
+    <p style="color:var(--color-text-muted)"><?= t('games.choose') ?></p>
+</div>
+<div style="display:flex;gap:2rem;justify-content:center;flex-wrap:wrap">
+    <a href="/roulette" style="text-decoration:none">
+        <div class="card game-card" style="width:260px;text-align:center;cursor:pointer">
+            <div style="font-size:4rem;margin-bottom:.8rem">&#9900;</div>
+            <div class="card__title" style="font-size:1.3rem"><?= t('nav.roulette') ?></div>
+            <p style="color:var(--color-text-muted);font-size:.9rem;margin-top:.5rem"><?= t('games.roulette_desc') ?></p>
+            <div class="btn btn--gold" style="margin-top:1rem;display:inline-block"><?= t('games.play') ?></div>
+        </div>
+    </a>
+    <a href="/slots" style="text-decoration:none">
+        <div class="card game-card" style="width:260px;text-align:center;cursor:pointer">
+            <div style="font-size:4rem;margin-bottom:.8rem">&#127922;</div>
+            <div class="card__title" style="font-size:1.3rem"><?= t('nav.slots') ?></div>
+            <p style="color:var(--color-text-muted);font-size:.9rem;margin-top:.5rem"><?= t('games.slots_desc') ?></p>
+            <div class="btn btn--gold" style="margin-top:1rem;display:inline-block"><?= t('games.play') ?></div>
+        </div>
+    </a>
+    <a href="/dice" style="text-decoration:none">
+        <div class="card game-card" style="width:260px;text-align:center;cursor:pointer">
+            <div style="font-size:4rem;margin-bottom:.8rem">&#127921;</div>
+            <div class="card__title" style="font-size:1.3rem"><?= t('nav.dice') ?></div>
+            <p style="color:var(--color-text-muted);font-size:.9rem;margin-top:.5rem"><?= t('games.dice_desc') ?></p>
+            <div class="btn btn--gold" style="margin-top:1rem;display:inline-block"><?= t('games.play') ?></div>
+        </div>
+    </a>
+</div>
+<?php require dirname(__DIR__) . '/layout/footer.phtml'; ?>

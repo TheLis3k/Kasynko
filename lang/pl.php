@@ -24,6 +24,14 @@ return [
     'auth.terms'            => 'Akceptuję regulamin',
     'auth.profile_updated'  => 'Profil zaktualizowany.',
 
+    // Games panel
+    'nav.games'          => 'Gry',
+    'games.welcome'      => 'Witaj w kasynie!',
+    'games.choose'       => 'Wybierz grę, w którą chcesz zagrać.',
+    'games.play'         => 'Zagraj',
+    'games.roulette_desc'=> 'Postaw na numer, kolor lub parzystość. Wygrana do ×35!',
+    'games.slots_desc'   => 'Zakręć bębnami i wygrywaj mnożniki. Spróbuj szczęścia!',
+
     // Navigation
     'nav.home'       => 'Strona główna',
     'nav.roulette'   => 'Ruletka',
@@ -45,6 +53,9 @@ return [
     'game.insufficient'  => 'Niewystarczające saldo.',
     'game.winning_number'=> 'Wylosowana liczba',
     'game.reels'         => 'Bębny',
+    'game.payout_table'  => 'Tabela wypłat',
+    'game.combination'   => 'Kombinacja',
+    'game.multiplier'    => 'Mnożnik',
     'game.number'        => 'Numer (0–36)',
     'game.color'         => 'Kolor',
     'game.parity'        => 'Parzyste/Nieparzyste',
@@ -70,6 +81,7 @@ return [
     'bets.payout'        => 'Wypłata',
     'bets.date'          => 'Data',
     'bets.note'          => 'Notatka',
+    'bets.document'      => 'Dokument / zrzut ekranu (PDF lub obraz, opcjonalnie)',
     'bets.search'        => 'Szukaj',
     'bets.filter'        => 'Filtruj',
     'bets.date_from'     => 'Data od',
@@ -82,7 +94,13 @@ return [
     'bets.total_payout'  => 'Łącznie wypłacono',
     'bets.net'           => 'Przychód netto',
     'bets.count'         => 'Liczba zakładów',
+    'bets.user'          => 'Użytkownik',
+    'bets.select_user'   => '— Wybierz użytkownika —',
+    'bets.all_users'     => '— Wszyscy użytkownicy —',
     'bets.all_games'     => '— Wszystkie gry —',
+    'bets.type_bet'      => 'Zakład (Jednoręki Bandyta)',
+    'bets.reels'         => 'Bębny',
+    'bets.reel'          => 'Bęben',
     'bets.win'           => 'Wygrana',
     'bets.lose'          => 'Przegrana',
     'bets.all_outcomes'  => '— Wszystkie wyniki —',
@@ -125,6 +143,49 @@ return [
     'pagination.next' => 'Następna »',
     'pagination.of'   => 'z',
 
+    // K-means segmentacja
+    'kmeans.title'            => 'Segmentacja graczy (K-means)',
+    'kmeans.run'              => 'Uruchom klastrowanie',
+    'kmeans.no_results'       => 'Brak wyników — kliknij „Uruchom klastrowanie".',
+    'kmeans.not_enough_players' => 'Za mało graczy do klastrowania (minimum 3).',
+    'kmeans.clustered'        => 'Sklasyfikowano %d graczy.',
+    'kmeans.results_table'    => 'Wyniki segmentacji',
+    'kmeans.segment'          => 'Segment',
+    'kmeans.avg_bet'          => 'Śr. zakład',
+    'kmeans.total_games'      => 'Liczba gier',
+    'kmeans.win_loss_ratio'   => 'W/L ratio',
+    'kmeans.clustered_at'     => 'Data klastrowania',
+
+    // Promocje
+    'promo.title'                  => 'Promocje i nagrody',
+    'promo.top_spenders'           => 'Top gracze — nagrody',
+    'promo.top_spenders_desc'      => 'Przyznaj ręczną nagrodę graczom z największymi wydatkami.',
+    'promo.award'                  => 'Przyznaj nagrodę',
+    'promo.already_rewarded'       => 'Nagrodzono',
+    'promo.confirm_award'          => 'Przyznać nagrodę temu graczowi?',
+    'promo.note_placeholder'       => 'Notatka (opcjonalnie)',
+    'promo.reward_granted'         => 'Nagroda %.2f przyznana.',
+    'promo.reward_not_configured'  => 'Brak aktywnej promocji typu „reward".',
+    'promo.user_not_found'         => 'Gracz nie istnieje.',
+    'promo.welcome_granted'        => 'Bonus powitalny +%s dodany do konta!',
+    'promo.deposit_bonus_granted'  => 'Bonus od wpłaty +%s!',
+    'promo.history'                => 'Historia bonusów',
+    'promo.no_history'             => 'Brak przyznanych bonusów.',
+    'promo.promotion_name'         => 'Promocja',
+    'promo.amount_awarded'         => 'Kwota',
+
+    // Doładowanie
+    'deposit.title'   => 'Doładuj konto',
+    'deposit.desc'    => 'Doładuj konto o dowolną kwotę. Bonus od wpłaty naliczany automatycznie.',
+    'deposit.amount'  => 'Kwota wpłaty',
+    'deposit.submit'  => 'Wpłać',
+    'deposit.success' => 'Wpłacono %.2f na konto.',
+
+    // Navigation (deposit link)
+    'nav.deposit'     => 'Doładuj',
+    'nav.segments'    => 'Segmentacja',
+    'nav.promotions'  => 'Promocje',
+
     // General
     'general.save'   => 'Zapisz',
     'general.cancel' => 'Anuluj',
@@ -134,4 +195,49 @@ return [
     'general.edit'   => 'Edytuj',
     'general.delete' => 'Usuń',
     'general.confirm_delete' => 'Czy na pewno chcesz usunąć?',
+
+    // Fixes for previously hardcoded strings
+    'admin.last_played'      => 'Ostatnia gra',
+    'bets.records_count'     => '%d rekordów',
+    'auth.welcome_bonus_hint'=> 'Bonus powitalny: 500 żetonów po rejestracji!',
+    'profile.deleted'        => 'Konto zostało usunięte.',
+    'error.500_title'        => 'Wewnętrzny błąd serwera',
+    'error.500_team'         => 'Ekipa sprytnych szympansów pracuje nad rozwiązaniem. Podaj ten kod:',
+    'error.500_home'         => 'Wróć na stronę główną',
+
+    // Dice game
+    'nav.dice'            => 'Kości',
+    'games.dice_desc'     => 'Rzuć dwiema kośćmi i obstawiaj sumę, wysoką/niską lub parzystość.',
+    'game.dice_total'     => 'Dokładna suma (2–12)',
+    'game.dice_high_low'  => 'Wysoka/Niska',
+    'game.dice_high'      => 'Wysoka (8–12)',
+    'game.dice_low'       => 'Niska (2–6)',
+    'game.dice_parity'    => 'Parzyste/Nieparzyste',
+    'game.dice_bet_total' => 'Suma',
+    'game.dice1'          => 'Kość 1',
+    'game.dice2'          => 'Kość 2',
+    'game.dice_result'    => 'Wynik rzutu',
+    'game.dice_sum'       => 'Suma',
+    'game.payout_table_dice' => 'Tabela wypłat — Kości',
+    'game.dice_high_desc' => 'Wysoka: suma 8–12',
+    'game.dice_low_desc'  => 'Niska: suma 2–6',
+    'game.dice_7_loses'   => '(7 przegrywa high/low)',
+
+    // Croupier panel
+    'nav.croupier'         => 'Panel krupiera',
+    'croupier.title'       => 'Panel krupiera',
+    'croupier.desc'        => 'Podgląd aktywności graczy — tryb tylko do odczytu.',
+    'croupier.live_stats'  => 'Statystyki na żywo',
+
+    // Audit log
+    'admin.audit_log'      => 'Dziennik zdarzeń',
+    'audit.action'         => 'Akcja',
+    'audit.entity'         => 'Obiekt',
+    'audit.actor'          => 'Użytkownik',
+    'audit.description'    => 'Opis',
+    'audit.date'           => 'Data',
+    'audit.no_entries'     => 'Brak wpisów.',
+
+    // PDF export
+    'bets.export_pdf'      => 'Eksport PDF',
 ];

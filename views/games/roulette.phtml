@@ -1,11 +1,39 @@
 <?php $pageTitle = t('nav.roulette'); require dirname(__DIR__) . '/layout/header.phtml'; ?>
+<?php
+$redNumbers = [1,3,5,7,9,12,14,16,18,19,21,23,25,27,30,32,34,36];
+function rouletteColor(int $n, array $reds): string {
+    if ($n === 0)               return '#1e7e34'; // green
+    return in_array($n, $reds) ? '#c0392b' : '#1a1a1a'; // red / black
+}
+?>
+<style>
+.roulette-result{text-align:center;margin-bottom:1.5rem}
+.roulette-wheel{
+    display:inline-flex;align-items:center;justify-content:center;
+    width:100px;height:100px;border-radius:50%;
+    font-size:2.5rem;font-weight:700;color:#fff;
+    border:4px solid var(--color-gold);
+    margin-bottom:.8rem;
+}
+.roulette-wheel.spin{animation:rouletteSpin .8s cubic-bezier(.17,.67,.83,.67)}
+@keyframes rouletteSpin{
+    0%{transform:rotate(0deg)}
+    60%{transform:rotate(1080deg)}
+    80%{transform:rotate(1060deg)}
+    100%{transform:rotate(1080deg)}
+}
+.bet-value-group{display:none}
+.bet-value-group.active{display:block}
+</style>
+
 <div class="game-wrap">
     <div class="card">
         <div class="card__title">&#9900; <?= t('nav.roulette') ?></div>
 
         <?php if ($result): ?>
-        <div style="text-align:center;margin-bottom:1.5rem">
-            <div class="roulette-wheel"><?= (int)$result['winning_number'] ?></div>
+        <div class="roulette-result">
+            <?php $wheelColor = rouletteColor((int)$result['winning_number'], $redNumbers); ?>
+            <div class="roulette-wheel spin" style="background:<?= $wheelColor ?>"><?= (int)$result['winning_number'] ?></div>
             <p><?= t('game.winning_number') ?>: <strong><?= (int)$result['winning_number'] ?></strong></p>
             <?php if ($result['is_win']): ?>
                 <p style="color:var(--color-success);font-size:1.2rem;font-weight:700">
@@ -22,41 +50,53 @@
 
             <div class="form-group">
                 <label for="bet_type"><?= t('game.bet_type') ?></label>
-                <select id="bet_type" name="bet_type" onchange="updateBetValue(this.value)">
-                    <option value="number"><?= t('game.number') ?></option>
-                    <option value="color"><?= t('game.color') ?></option>
-                    <option value="parity"><?= t('game.parity') ?></option>
+                <select id="bet_type" name="bet_type" onchange="switchBetType(this.value)">
+                    <?php $lastType = $result['bet_type'] ?? 'number'; ?>
+                    <option value="number" <?= $lastType === 'number' ? 'selected' : '' ?>><?= t('game.number') ?></option>
+                    <option value="color"  <?= $lastType === 'color'  ? 'selected' : '' ?>><?= t('game.color') ?></option>
+                    <option value="parity" <?= $lastType === 'parity' ? 'selected' : '' ?>><?= t('game.parity') ?></option>
                 </select>
             </div>
 
-            <!-- No-JS: all three value fields always present; server picks based on bet_type -->
-            <div class="form-group">
+            <div id="val-number" class="form-group bet-value-group <?= $lastType === 'number' ? 'active' : '' ?>">
                 <label><?= t('game.number') ?></label>
-                <input type="number" name="bet_value_number" min="0" max="36" step="1" value="0">
+                <input type="number" name="bet_value_number" min="0" max="36" step="1"
+                       value="<?= ($lastType === 'number') ? (int)($result['bet_value'] ?? 0) : 0 ?>">
             </div>
-            <div class="form-group">
+            <div id="val-color" class="form-group bet-value-group <?= $lastType === 'color' ? 'active' : '' ?>">
                 <label><?= t('game.color') ?></label>
                 <select name="bet_value_color">
-                    <option value="red"><?= t('game.red') ?></option>
-                    <option value="black"><?= t('game.black') ?></option>
+                    <?php $lastColor = ($lastType === 'color') ? ($result['bet_value'] ?? 'red') : 'red'; ?>
+                    <option value="red"   <?= $lastColor === 'red'   ? 'selected' : '' ?>><?= t('game.red') ?></option>
+                    <option value="black" <?= $lastColor === 'black' ? 'selected' : '' ?>><?= t('game.black') ?></option>
                 </select>
             </div>
-            <div class="form-group">
+            <div id="val-parity" class="form-group bet-value-group <?= $lastType === 'parity' ? 'active' : '' ?>">
                 <label><?= t('game.parity') ?></label>
                 <select name="bet_value_parity">
-                    <option value="even"><?= t('game.even') ?></option>
-                    <option value="odd"><?= t('game.odd') ?></option>
+                    <?php $lastParity = ($lastType === 'parity') ? ($result['bet_value'] ?? 'even') : 'even'; ?>
+                    <option value="even" <?= $lastParity === 'even' ? 'selected' : '' ?>><?= t('game.even') ?></option>
+                    <option value="odd"  <?= $lastParity === 'odd'  ? 'selected' : '' ?>><?= t('game.odd') ?></option>
                 </select>
             </div>
 
             <div class="form-group">
                 <label for="bet_amount"><?= t('game.bet_amount') ?></label>
-                <input type="number" id="bet_amount" name="bet_amount" min="0.01" step="0.01" value="10" required>
+                <input type="number" id="bet_amount" name="bet_amount" min="0.01" step="0.01"
+                       value="<?= number_format((float)($result['bet_amount'] ?? 10), 2, '.', '') ?>" required>
             </div>
 
             <button type="submit" class="btn btn--gold" style="width:100%"><?= t('game.place_bet') ?></button>
         </form>
     </div>
 </div>
+
+<script>
+function switchBetType(type) {
+    ['number','color','parity'].forEach(function(t) {
+        document.getElementById('val-' + t).classList.toggle('active', t === type);
+    });
+}
+</script>
 
 <?php require dirname(__DIR__) . '/layout/footer.phtml'; ?>

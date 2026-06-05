@@ -3,15 +3,16 @@
 namespace App\Controllers;
 
 use App\Helpers\{Database, Validation};
-use App\Models\{User, Game, GameSession};
+use App\Models\{AuditLog, User, Game, GameSession};
 use App\Services\Roulette\RouletteEngine;
 
 class RouletteController extends BaseController
 {
-    private User        $users;
-    private Game        $games;
-    private GameSession $sessions;
+    private User           $users;
+    private Game           $games;
+    private GameSession    $sessions;
     private RouletteEngine $engine;
+    private AuditLog       $audit;
 
     public function __construct()
     {
@@ -20,6 +21,7 @@ class RouletteController extends BaseController
         $this->games    = new Game($pdo);
         $this->sessions = new GameSession($pdo);
         $this->engine   = new RouletteEngine();
+        $this->audit    = new AuditLog($pdo);
     }
 
     public function show(): void
@@ -97,6 +99,15 @@ class RouletteController extends BaseController
         // Refresh session balance
         $updated = $this->users->findById($userId);
         $_SESSION['user']['balance'] = $updated['balance'];
+
+        $this->audit->log(
+            $userId,
+            $_SESSION['user']['first_name'] . ' ' . $_SESSION['user']['last_name'],
+            'play_roulette',
+            'game_session',
+            null,
+            ($outcome === 'win' ? 'WIN' : 'LOSE') . ' — bet=' . $amount . ' payout=' . $payout . ' type=' . $betType . '/' . $betValue
+        );
 
         $_SESSION['roulette_result'] = [
             'winning_number' => $result['winning_number'],

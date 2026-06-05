@@ -1,0 +1,77 @@
+<?php $pageTitle = t('kmeans.title'); require dirname(__DIR__) . '/layout/header.phtml'; ?>
+<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:1.5rem">
+    <h1 style="font-size:1.4rem;color:var(--color-gold)"><?= t('kmeans.title') ?></h1>
+    <div style="display:flex;gap:.75rem">
+        <a href="/admin" class="btn btn--outline btn--sm"><?= t('admin.dashboard') ?></a>
+        <form method="post" action="/admin/segments/run" style="margin:0">
+            <input type="hidden" name="_csrf" value="<?= csrf_token() ?>">
+            <button type="submit" class="btn btn--primary btn--sm"><?= t('kmeans.run') ?></button>
+        </form>
+    </div>
+</div>
+
+<?php if (empty($segments)): ?>
+    <div class="card" style="text-align:center;padding:2rem">
+        <p style="color:var(--color-text-muted)"><?= t('kmeans.no_results') ?></p>
+        <form method="post" action="/admin/segments/run" style="margin-top:1rem">
+            <input type="hidden" name="_csrf" value="<?= csrf_token() ?>">
+            <button type="submit" class="btn btn--primary"><?= t('kmeans.run') ?></button>
+        </form>
+    </div>
+<?php else: ?>
+    <?php
+    $bySegment = [];
+    foreach ($segments as $row) {
+        $bySegment[$row['segment']][] = $row;
+    }
+    $segmentColors = ['Wieloryb' => '#f0c040', 'Casual' => '#4caf50', 'Niedzielny Janusz' => '#90a4ae'];
+    ?>
+
+    <div class="stats-grid" style="margin-bottom:1.5rem">
+        <?php foreach ($bySegment as $seg => $members): ?>
+        <div class="stat-card">
+            <div class="stat-card__value" style="color:<?= $segmentColors[$seg] ?? 'var(--color-gold)' ?>">
+                <?= count($members) ?>
+            </div>
+            <div class="stat-card__label"><?= e($seg) ?></div>
+        </div>
+        <?php endforeach; ?>
+    </div>
+
+    <div class="card">
+        <div class="card__title"><?= t('kmeans.results_table') ?></div>
+        <div class="table-wrap">
+            <table>
+                <thead>
+                    <tr>
+                        <th><?= t('auth.first_name') ?> <?= t('auth.last_name') ?></th>
+                        <th><?= t('auth.email') ?></th>
+                        <th><?= t('kmeans.segment') ?></th>
+                        <th><?= t('kmeans.avg_bet') ?></th>
+                        <th><?= t('kmeans.total_games') ?></th>
+                        <th><?= t('kmeans.win_loss_ratio') ?></th>
+                        <th><?= t('kmeans.clustered_at') ?></th>
+                    </tr>
+                </thead>
+                <tbody>
+                <?php foreach ($segments as $row): ?>
+                    <tr>
+                        <td><?= e($row['first_name'] . ' ' . $row['last_name']) ?></td>
+                        <td><?= e($row['email']) ?></td>
+                        <td>
+                            <span class="badge" style="background:<?= $segmentColors[$row['segment']] ?? '#888' ?>;color:#000">
+                                <?= e($row['segment']) ?>
+                            </span>
+                        </td>
+                        <td><?= number_format((float)$row['avg_bet'], 2) ?></td>
+                        <td><?= (int)$row['total_games'] ?></td>
+                        <td><?= number_format((float)$row['win_loss_ratio'], 2) ?></td>
+                        <td><?= e(substr($row['clustered_at'], 0, 16)) ?></td>
+                    </tr>
+                <?php endforeach; ?>
+                </tbody>
+            </table>
+        </div>
+    </div>
+<?php endif; ?>
+<?php require dirname(__DIR__) . '/layout/footer.phtml'; ?>

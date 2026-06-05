@@ -1,17 +1,17 @@
 <!DOCTYPE html>
-<html lang="pl">
+<html lang="<?= isset($_SESSION['lang']) ? htmlspecialchars($_SESSION['lang']) : 'pl' ?>">
 <head>
     <meta charset="UTF-8">
-    <title>500 – Błąd serwera</title>
+    <title>500</title>
     <link rel="stylesheet" href="/css/app.css">
 </head>
 <body>
 <div class="error-page error-page--standalone">
     <h1>500</h1>
-    <p><?= isset($_SESSION) ? t('error.500') : 'Wewnętrzny błąd serwera.' ?></p>
-    <a href="/" class="btn">Wróć na stronę główną</a>
-    <p>Ekipa sprytnych szympansów pracuje nad rozwiązaniem problemu, jakbyś je widział podaj im ten kod: </a>
-    <p>AIOUGsuiir3r0909avda=-ASfpAOr3AIOj30q[jAIO[jr23[q0fcj[a)JIOFAj@#0jadfpasjfF_RJKvo-a[</p>
+    <p><?= isset($_SESSION) ? t('error.500') : 'Internal server error.' ?></p>
+    <a href="/" class="btn"><?= isset($_SESSION) ? t('error.500_home') : 'Back to home' ?></a>
+    <p style="margin-top:1rem;font-size:.85rem;color:#888"><?= isset($_SESSION) ? t('error.500_team') : 'Please share this error code:' ?></p>
+    <p style="font-family:monospace;font-size:.8rem;color:#aaa">ERR-<?= substr(md5(uniqid('', true)), 0, 12) ?></p>
 </div>
 </body>
 </html>
